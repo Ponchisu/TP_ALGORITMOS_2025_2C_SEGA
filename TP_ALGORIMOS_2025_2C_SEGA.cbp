@@ -30,8 +30,47 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="SDL2/include" />
+			<Add directory="SDL2/include/SDL2" />
+			<Add directory="SDL2_image/include" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Linker>
+			<Add library="SDL2_image" />
+			<Add library="SDL2" />
+			<Add library="SDL2main" />
+			<Add directory="SDL2/lib" />
+			<Add directory="SDL2_image/lib" />
+		</Linker>
+		<Unit filename="headers/bool.h" />
+		<Unit filename="headers/game.h" />
+		<Unit filename="headers/ghost.h" />
+		<Unit filename="headers/laberinto.h" />
+		<Unit filename="headers/matriz.h" />
+		<Unit filename="headers/player.h" />
+		<Unit filename="headers/textureManager.h" />
+		<Unit filename="headers/tlista.h" />
+		<Unit filename="includes/game.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/ghost.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/laberinto.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/matriz.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/player.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/textureManager.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/tlista.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions />

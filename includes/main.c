@@ -6,7 +6,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "../headers/game.h"
 
@@ -14,7 +13,10 @@ int main(int argc, char* argv[]) {
     Game* game;
 
     gameCreate(&game);
-    gameInit(game, 10, 10);
+    if(!gameInit(game, 10, 10)) {
+        gameClean(&game);
+        return 0;
+    }
 
     gameRunning(game);
 

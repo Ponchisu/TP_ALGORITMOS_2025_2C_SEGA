@@ -1,6 +1,8 @@
 #include "../headers/game.h"
 
 void gameEvent(Game* game);
+void gameDraw(Game* game);
+void gameUpdate(Game* game);
 
 bool gameCreate(Game** game) {
     *game = (Game*)malloc(sizeof(Game));
@@ -11,23 +13,21 @@ bool gameCreate(Game** game) {
     return true;
 }
 
-bool gameInit(Game* game, unsigned filas, unsigned columnas) {
+bool gameInit(Game* game, int filas, int columnas) {
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
     }
 
-    game->window = SDL_CreateWindow("Laberinto", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columnas * ALTO, filas * ANCHO, 0);
+    game->window = SDL_CreateWindow("Laberinto", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columnas * ANCHO, filas * ALTO + 50, 0);
     if(!game->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
-        gameClean(&game);
         return false;
     }
 
     game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
     if(!game->renderer) {
         fprintf(stderr, "Error al crear renderer: %s\n", SDL_GetError());
-        gameClean(&game);
         return false;
     }
 
@@ -93,6 +93,10 @@ void gameDraw(Game* game) {
     laberintoDraw(game->laberinto);
 
     SDL_RenderPresent(game->renderer);
+}
+
+void gameUpdate(Game* game) {
+    
 }
 
  void gameRunning(Game* game) {

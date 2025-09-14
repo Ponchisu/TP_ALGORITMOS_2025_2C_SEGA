@@ -2,14 +2,15 @@
 #define MATRIZ_H_INCLUDED
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
+
+#include "../headers/bool.h"
 
 #define TAM_LINEA 130
 
-void** matrizCrear(unsigned filas, unsigned columnas, unsigned temElem);
-void matrizEliminar(void** mat, unsigned filas);
-bool matrizCargarDeArchTxt(char** mat, unsigned columnas);
+void** matrizCrear(int filas, int columnas, int temElem);
+void matrizEliminar(void** mat, int filas);
+bool matrizCargarDeArchTxt(char** mat, int columnas);
 
 void matrizMostrar(char** mat, int filas, int columnas);
 

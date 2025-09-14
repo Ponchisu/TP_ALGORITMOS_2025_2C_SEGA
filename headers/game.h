@@ -3,10 +3,10 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 #include "../headers/laberinto.h"
+#include "../headers/bool.h"
 
 typedef struct {
     SDL_Window* window;
@@ -17,10 +17,9 @@ typedef struct {
 } Game;
 
 bool gameCreate(Game** game);
-bool gameInit(Game* game, unsigned filas, unsigned columnas);
+bool gameInit(Game* game, int filas, int columnas);
 void gameClean(Game** game);
 void gameRunning(Game* game);
-void gameDraw(Game* game);
 
 
 #endif // GAME_H_INCLUDED

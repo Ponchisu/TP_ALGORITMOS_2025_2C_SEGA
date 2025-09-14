@@ -1,6 +1,6 @@
 #include "../headers/matriz.h"
 
-void** matrizCrear(unsigned filas, unsigned columnas, unsigned tamElem)
+void** matrizCrear(int filas, int columnas, int tamElem)
 {
     void** mat = malloc(sizeof(void*) * filas);
 
@@ -26,7 +26,7 @@ void** matrizCrear(unsigned filas, unsigned columnas, unsigned tamElem)
 
 }
 
-void matrizEliminar(void** mat, unsigned filas)
+void matrizEliminar(void** mat, int filas)
 {
     void** ult = mat + filas - 1;
     for(void** i = mat; i <= ult ; i++)
@@ -37,7 +37,7 @@ void matrizEliminar(void** mat, unsigned filas)
 
 }
 
-bool matrizCargarDeArchTxt(char** mat, unsigned columnas) {
+bool matrizCargarDeArchTxt(char** mat, int columnas) {
     int fila = 0;
     char linea[TAM_LINEA];
     char* act;

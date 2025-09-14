@@ -4,12 +4,16 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdbool.h>
 
+#include "../headers/bool.h"
 #include "../headers/matriz.h"
+#include "../headers/textureManager.h"
+#include "../headers/tlista.h"
+#include "../headers/player.h"
+#include "../headers/ghost.h"
 
-#define ANCHO 16
-#define ALTO 16
+#define ANCHO 32
+#define ALTO 32
 
 typedef struct 
 {
@@ -18,15 +22,16 @@ typedef struct
     SDL_Texture* texturePared;
     SDL_Texture* textureEntrada;
     SDL_Texture* textureSalida;
+    SDL_Texture* texturePlayer;
+    SDL_Texture* textureFantasma;
     char** laberinto;
-    unsigned filas;
-    unsigned columnas;
-    unsigned alto;
-    unsigned ancho;
+    int filas;
+    int columnas;
+    tlista lista;
 }tlaberinto;
 
-bool laberintoCreate(tlaberinto** laberinto, unsigned filas, unsigned columnas, SDL_Renderer* render);
-void laberintoClean(tlaberinto** laberinto, unsigned filas);
+bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Renderer* render);
+void laberintoClean(tlaberinto** laberinto, int filas);
 void laberintoDraw(tlaberinto* laberinto);
 
 
