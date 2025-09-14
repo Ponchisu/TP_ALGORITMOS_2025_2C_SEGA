@@ -2,5 +2,11 @@
 *.o
 *.depend
 *.layout
+*.a
+*.txt
+
+*.dll
+SDL2/
+SDL2_image/
 
 .vscode/
