@@ -91,7 +91,7 @@ void laberintoClean(tlaberinto** laberinto, int filas) {
         SDL_DestroyTexture((*laberinto)->textureSuelo);
     }
     if((*laberinto)->textureEntrada != NULL) {
-            SDL_DestroyTexture((*laberinto)->textureEntrada);
+        SDL_DestroyTexture((*laberinto)->textureEntrada);
     }
     if((*laberinto)->textureSalida != NULL) {
         SDL_DestroyTexture((*laberinto)->textureSalida);

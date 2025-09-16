@@ -10,9 +10,5 @@ SDL_Texture* textureManagerLoad(const char* fileName, SDL_Renderer* pRenderer) {
     SDL_Texture* pTexture = SDL_CreateTextureFromSurface(pRenderer, pTempSurface);
     SDL_FreeSurface(pTempSurface);
 
-    if(pTexture == NULL) {
-        return NULL;
-    }
-
     return pTexture;
 }

@@ -25,7 +25,10 @@ bool gameInit(Game* game, int filas, int columnas) {
         return false;
     }
 
-    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED); 
+    if(!game->renderer)
+        game->renderer = SDL_CreateRenderer(game->window, -1, 0); //por si el sistema no soporta ACCELERATED
+
     if(!game->renderer) {
         fprintf(stderr, "Error al crear renderer: %s\n", SDL_GetError());
         return false;
@@ -36,7 +39,7 @@ bool gameInit(Game* game, int filas, int columnas) {
     }
 
     SDL_Surface* icon = IMG_Load("assets/icon.jpg");
-    if(icon == NULL) {
+    if(!icon) {
         fprintf(stderr, "Error al cargar icono: %s", SDL_GetError());
         return false;
     }
@@ -51,7 +54,12 @@ bool gameInit(Game* game, int filas, int columnas) {
 }
 
 void gameClean(Game** game) {
-    laberintoClean(&(*game)->laberinto, (*game)->laberinto->filas);
+    ///si el doble puntero enviado es invalido, o si el puntero no apunta a nada, retorna
+    if (!game || !*game)
+        return;
+
+    if ((*game)->laberinto)
+        laberintoClean(&(*game)->laberinto, (*game)->laberinto->filas);
 
     if((*game)->renderer) {
         SDL_DestroyRenderer((*game)->renderer);
