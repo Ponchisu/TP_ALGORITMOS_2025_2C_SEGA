@@ -1,7 +1,7 @@
 #include "../headers/player.h"
 
-void playerCreate(tPlayer* player, int x, int y, const char* id) {
-    strcpy(player->id, id);
+void playerCreate(tPlayer* player, int y, int x) {
     player->x = x;
     player->y = y;
+    player->vidas = 3;
 }

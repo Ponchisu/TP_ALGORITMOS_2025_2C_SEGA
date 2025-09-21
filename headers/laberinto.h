@@ -11,23 +11,16 @@
 #include "../headers/tlista.h"
 #include "../headers/player.h"
 #include "../headers/ghost.h"
-
-#define ANCHO 32
-#define ALTO 32
+#include "../headers/vector.h"
 
 typedef struct 
 {
     SDL_Renderer* render;
-    SDL_Texture* textureSuelo;
-    SDL_Texture* texturePared;
-    SDL_Texture* textureEntrada;
-    SDL_Texture* textureSalida;
-    SDL_Texture* texturePlayer;
-    SDL_Texture* textureFantasma;
     char** laberinto;
     int filas;
     int columnas;
-    tlista lista;
+    tPlayer player;
+    Vector vecTex;
 }tlaberinto;
 
 bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Renderer* render);

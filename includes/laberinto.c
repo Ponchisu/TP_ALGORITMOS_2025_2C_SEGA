@@ -1,8 +1,7 @@
 #include "../headers/laberinto.h"
 
 bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Renderer* render) {
-    tPlayer player;
-    tGhost ghost;
+    //tGhost tGhost;
 
     *laberinto = (tlaberinto*)malloc(sizeof(tlaberinto));
     if(*laberinto == NULL) {
@@ -13,11 +12,6 @@ bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Render
     (*laberinto)->filas = filas;
     (*laberinto)->columnas = columnas;
     (*laberinto)->render = render;
-
-    (*laberinto)->texturePared = NULL;
-    (*laberinto)->textureSalida = NULL;
-    (*laberinto)->textureSuelo = NULL;
-    (*laberinto)->textureEntrada = NULL;
 
     (*laberinto)->laberinto = (char**)matrizCrear(filas, columnas, sizeof(char));
     if((*laberinto)->laberinto == NULL) {
@@ -30,48 +24,52 @@ bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Render
         return false;
     }
 
-    listaCrear(&(*laberinto)->lista);
+
+    if(!Vector_create(&(*laberinto)->vecTex, sizeof(tTexture))) {
+        fprintf(stderr, "Error al crear vector");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/entrada32x32.png", "entrada", render)) {
+        fprintf(stderr, "Error al cargar imagen Entrada");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/salida32x32.png", "salida", render)) {
+        fprintf(stderr, "Error al cargar imagen Salida");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/personaje32.png", "player", render)) {
+        fprintf(stderr, "Error al cargar imagen Player");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/suelo32x32.png", "suelo", render)) {
+        fprintf(stderr, "Error al cargar imagen Suelo");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/pared32x32.png", "pared", render)) {
+        fprintf(stderr, "Error al cargar imagen Pared");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*laberinto)->vecTex, "assets/fantasma32.png", "ghost", render)) {
+        fprintf(stderr, "Error al cargar imagen Fantasma");
+        return false;
+    }
+
     for (int i = 0; i < (*laberinto)->filas; i++) {
         for (int j = 0; j < (*laberinto)->columnas; j++) {
-            if ((*laberinto)->laberinto[i][j] == 'F') {
-                ghostCreate(&ghost, i, j, "ghost");
-                listaPonerAlFinal(&(*laberinto)->lista, &ghost, sizeof(tGhost));
-            }
+            // if ((*laberinto)->laberinto[i][j] == 'F') {
+            //     ghostCreate(&ghost, i, j, "ghost");
+            //     listaPonerAlFinal(&(*laberinto)->lista, &ghost, sizeof(tGhost));
+            // }
             if ((*laberinto)->laberinto[i][j] == 'E') {
-                playerCreate(&player, i + 1, j, "player");
-                listaPonerAlFinal(&(*laberinto)->lista, &player, sizeof(tPlayer));
+                playerCreate(&(*laberinto)->player, i, j);
             }
         }
-    }
-
-    (*laberinto)->textureSuelo = textureManagerLoad("assets/suelo32x32.png", render);
-    if((*laberinto)->textureSuelo == NULL) {
-        return false;
-    }
-
-    (*laberinto)->texturePared = textureManagerLoad("assets/pared32x32.png", render);
-    if((*laberinto)->texturePared == NULL) {
-        return false;
-    }
-
-    (*laberinto)->textureEntrada = textureManagerLoad("assets/entrada32x32.png", render);
-    if((*laberinto)->textureEntrada == NULL) {
-        return false;
-    }
-
-    (*laberinto)->textureSalida = textureManagerLoad("assets/salida32x32.png", render);
-    if((*laberinto)->textureSalida == NULL) {
-        return false;
-    }
-
-    (*laberinto)->texturePlayer = textureManagerLoad("assets/personaje32.png", render);
-    if((*laberinto)->texturePlayer == NULL) {
-        return false;
-    }
-
-    (*laberinto)->textureFantasma = textureManagerLoad("assets/fantasma32.png", render);
-    if((*laberinto)->textureFantasma == NULL) {
-        return false;
     }
 
     matrizMostrar((*laberinto)->laberinto, filas, columnas);
@@ -82,54 +80,32 @@ bool laberintoCreate(tlaberinto** laberinto, int filas, int columnas, SDL_Render
 void laberintoClean(tlaberinto** laberinto, int filas) {
     matrizEliminar((void**)(*laberinto)->laberinto, filas);
 
-    listaVaciar(&(*laberinto)->lista);
+    Vector_destroy(&(*laberinto)->vecTex);
 
-    if((*laberinto)->texturePared != NULL) {
-        SDL_DestroyTexture((*laberinto)->texturePared);
-    }
-    if((*laberinto)->textureSuelo != NULL) {
-        SDL_DestroyTexture((*laberinto)->textureSuelo);
-    }
-    if((*laberinto)->textureEntrada != NULL) {
-        SDL_DestroyTexture((*laberinto)->textureEntrada);
-    }
-    if((*laberinto)->textureSalida != NULL) {
-        SDL_DestroyTexture((*laberinto)->textureSalida);
-    }
-    if((*laberinto)->texturePlayer != NULL) {
-        SDL_DestroyTexture((*laberinto)->texturePlayer);
-    }
-    if((*laberinto)->textureFantasma != NULL) {
-        SDL_DestroyTexture((*laberinto)->textureFantasma);
-    }
     free(*laberinto);
 }
 
 void laberintoDraw(tlaberinto* laberinto) {
     for (int fila = 0; fila < laberinto->filas; fila++) {
         for (int col = 0; col < laberinto->columnas; col++) {
-                SDL_Rect rect = {col * ANCHO, fila * ALTO + 50, ANCHO, ALTO};
-
             if (laberinto->laberinto[fila][col] == '#') {
-                SDL_RenderCopy(laberinto->render, laberinto->texturePared, NULL, &rect);
+                TextureManagerDraw(&laberinto->vecTex, "pared", fila * ALTO, col * ANCHO, laberinto->render);
             }
             if (laberinto->laberinto[fila][col] == '.') {
-                SDL_RenderCopy(laberinto->render, laberinto->textureSuelo, NULL, &rect);
+                TextureManagerDraw(&laberinto->vecTex, "suelo", fila * ALTO, col * ANCHO, laberinto->render);
             }
             if (laberinto->laberinto[fila][col] == 'E') {
-                SDL_RenderCopy(laberinto->render, laberinto->textureEntrada, NULL, &rect);
+                TextureManagerDraw(&laberinto->vecTex, "entrada", fila * ALTO, col * ANCHO, laberinto->render);
             }
             if (laberinto->laberinto[fila][col] == 'S') {
-                SDL_RenderCopy(laberinto->render, laberinto->textureSalida, NULL, &rect);
+                TextureManagerDraw(&laberinto->vecTex, "salida", fila * ALTO, col * ANCHO, laberinto->render);
             }
             if (laberinto->laberinto[fila][col] == 'F') {
-                SDL_RenderCopy(laberinto->render, laberinto->textureSuelo, NULL, &rect);
-                SDL_RenderCopy(laberinto->render, laberinto->textureFantasma, NULL, &rect);
+                TextureManagerDraw(&laberinto->vecTex, "suelo", fila * ALTO, col * ANCHO, laberinto->render);
+                TextureManagerDraw(&laberinto->vecTex, "ghost", fila * ALTO, col * ANCHO, laberinto->render);
             }
-            if (laberinto->laberinto[fila][col] == 'P') {
-                SDL_RenderCopy(laberinto->render, laberinto->textureSuelo, NULL, &rect);
-                SDL_RenderCopy(laberinto->render, laberinto->texturePlayer, NULL, &rect);
-            }
+
+            TextureManagerDraw(&laberinto->vecTex, "player", laberinto->player.y * ALTO,  laberinto->player.x * ANCHO, laberinto->render);
         }
     }
 }
