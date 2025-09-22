@@ -109,3 +109,41 @@ void Maze_draw(tMaze* pMaze) {
         }
     }
 }
+
+bool Maze_handleEvents(tMaze* pMaze) {
+    bool isGameRunning = true;
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event) != 0) {
+        if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) {
+            isGameRunning = false;
+            puts("ENTER para salir");
+            return isGameRunning;
+        }
+        if (event.key.keysym.sym == SDLK_RIGHT) {
+            if(pMaze->maze[pMaze->player.y][pMaze->player.x + 1] != '#') {
+                pMaze->player.x += 1;
+            }
+            return isGameRunning;
+        }
+        if (event.key.keysym.sym == SDLK_LEFT) {
+            if(pMaze->maze[pMaze->player.y][pMaze->player.x - 1] != '#') {
+                pMaze->player.x -= 1;
+            }
+            return isGameRunning;
+        }
+        if (event.key.keysym.sym == SDLK_DOWN && pMaze->player.y < pMaze->rows - 1) {
+            if(pMaze->maze[pMaze->player.y + 1][pMaze->player.x] != '#') {
+                pMaze->player.y += 1;
+            }
+            return isGameRunning;
+        }
+        if (event.key.keysym.sym == SDLK_UP && pMaze->player.y > 0) {
+            if(pMaze->maze[pMaze->player.y - 1][pMaze->player.x] != '#') {
+                pMaze->player.y -= 1;
+            }
+            return isGameRunning;
+        }
+    }
+    return isGameRunning;
+}

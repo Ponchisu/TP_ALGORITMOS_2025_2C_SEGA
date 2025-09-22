@@ -27,6 +27,6 @@ typedef struct
 bool Maze_create(tMaze** pMaze, int rows, int columns, SDL_Renderer* render);
 void Maze_clean(tMaze** pMaze, int rows);
 void Maze_draw(tMaze* pMaze);
-
+bool Maze_handleEvents(tMaze* pMaze);
 
 #endif // MAZE_H_INCLUDED

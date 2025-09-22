@@ -11,5 +11,7 @@ typedef struct {
 
 void playerCreate(tPlayer* player, int y, int x);
 void playerUpdate();
+int Player_getX(tPlayer* player);
+int Player_getY(tPlayer* player);
 
 #endif // PLAYER_H_INCLUDED

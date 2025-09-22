@@ -1,6 +1,6 @@
 #include "../headers/game.h"
 
-void Game_event(tGame* game);
+void Game_handleEvents(tGame* game);
 void Game_draw(tGame* game);
 void Game_update(tGame* game);
 
@@ -73,25 +73,6 @@ void Game_clean(tGame** game) {
     *game = NULL;
 }
 
-void Game_event(tGame* game) {
-    while(SDL_PollEvent(&game->event)) {
-        switch (game->event.type) {
-        case SDL_QUIT:
-            game->running = false;
-            break;
-        case SDL_KEYDOWN:
-            switch (game->event.key.keysym.scancode) {
-            case SDL_SCANCODE_ESCAPE:
-                game->running = false;
-                break;
-            default:
-                break;
-            }
-            break;
-        }
-    }
-}
-
 void Game_draw(tGame* game) {
     SDL_RenderClear(game->renderer);
 
@@ -106,10 +87,16 @@ void Game_update(tGame* game) {
 
  void Game_running(tGame* game) {
     while (game->running) {
-        Game_event(game);
+        Game_handleEvents(game);
 
         Game_draw(game);
 
         SDL_Delay(16);
+    }
+ }
+
+ void Game_handleEvents(tGame* game) {
+    if(!Maze_handleEvents(game->maze)) {
+        game->running = false;
     }
  }
