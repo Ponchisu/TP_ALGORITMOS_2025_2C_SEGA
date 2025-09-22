@@ -10,7 +10,7 @@ typedef struct
     int y; 
 }tGhost;
 
-void ghostCreate(tGhost* ghost, int x, int y, const char* id);
+void Ghost_create(tGhost* ghost, int x, int y, const char* id);
 
 
 #endif // GHOST_H_INCLUDED

@@ -6,7 +6,7 @@
 typedef struct {
     int x;
     int y;
-    int vidas;
+    int lives;
 }tPlayer;
 
 void playerCreate(tPlayer* player, int y, int x);

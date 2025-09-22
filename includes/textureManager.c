@@ -18,8 +18,8 @@ bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_
     if(pTexture != NULL){
         tTexture tex;
         tex.texture = pTexture;
-        strncpy(tex.id, id, TAM_ID - 1);
-        tex.id[TAM_ID - 1] = '\0';
+        strncpy(tex.id, id, SIZE_ID - 1);
+        tex.id[SIZE_ID - 1] = '\0';
 
         if(!Vector_insertInOrder(vec, &tex, sizeof(tTexture), compararTex)){
             return false;
@@ -31,7 +31,7 @@ bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_
     return true;
 }
 
-void TextureManagerDraw(Vector* vec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
+void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
 
     SDL_Rect srcRect;
 
@@ -46,8 +46,8 @@ void TextureManagerDraw(Vector* vec, const char* id, int y, int x, SDL_Renderer*
 
     SDL_Texture* tex = texture.texture;
 
-    srcRect.w = ANCHO; //Cant de pixeles de ancho que tomamos de la imagen
-    srcRect.h = ALTO;  //Cant de pixeles de alto que tomamos de la imagen
+    srcRect.w = WIDTH; //Cant de pixeles de ancho que tomamos de la imagen
+    srcRect.h = HEIGTH;  //Cant de pixeles de alto que tomamos de la imagen
     srcRect.x = x;                         //Pos horizontal en la pantalla
     srcRect.y = y;                         //Pos vertical en la pantalla
 

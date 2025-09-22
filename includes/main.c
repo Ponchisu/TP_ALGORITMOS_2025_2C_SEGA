@@ -9,17 +9,17 @@
 
 #include "../headers/game.h"
 
-int main(int argc, char* argv[]) {
-    Game* game;
+int main(void) {
+    tGame* game;
 
-    gameCreate(&game);
-    if(!gameInit(game, 10, 10)) {
-        gameClean(&game);
+    Game_create(&game);
+    if(!Game_init(game, 10, 10)) {
+        Game_clean(&game);
         return 0;
     }
 
-    gameRunning(game);
+    Game_running(game);
 
-    gameClean(&game);
+    Game_clean(&game);
     return 0;
 }

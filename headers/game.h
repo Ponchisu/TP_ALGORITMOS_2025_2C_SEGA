@@ -5,21 +5,21 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 
-#include "../headers/laberinto.h"
+#include "../headers/maze.h"
 #include "../headers/bool.h"
 
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Event event;
-    tlaberinto* laberinto;
+    tMaze* maze;
     bool running;
-} Game;
+} tGame;
 
-bool gameCreate(Game** game);
-bool gameInit(Game* game, int filas, int columnas);
-void gameClean(Game** game);
-void gameRunning(Game* game);
+bool Game_create(tGame** game);
+bool Game_init(tGame* game, int rows, int columns);
+void Game_clean(tGame** game);
+void Game_running(tGame* game);
 
 
 #endif // GAME_H_INCLUDED

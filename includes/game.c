@@ -1,11 +1,11 @@
 #include "../headers/game.h"
 
-void gameEvent(Game* game);
-void gameDraw(Game* game);
-void gameUpdate(Game* game);
+void Game_event(tGame* game);
+void Game_draw(tGame* game);
+void Game_update(tGame* game);
 
-bool gameCreate(Game** game) {
-    *game = (Game*)malloc(sizeof(Game));
+bool Game_create(tGame** game) {
+    *game = (tGame*)malloc(sizeof(tGame));
     if(*game == NULL) {
         return false;
     }
@@ -13,21 +13,21 @@ bool gameCreate(Game** game) {
     return true;
 }
 
-bool gameInit(Game* game, int filas, int columnas) {
+bool Game_init(tGame* game, int rows, int columns) {
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
     }
 
-    game->window = SDL_CreateWindow("Laberinto", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columnas * ANCHO, filas * ALTO + 50, 0);
+    game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + 50, 0);
     if(!game->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
         return false;
     }
 
-    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED); 
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
     if(!game->renderer) {
-        game->renderer = SDL_CreateRenderer(game->window, -1, 0); 
+        game->renderer = SDL_CreateRenderer(game->window, -1, 0);
     }
 
     if(!game->renderer) {
@@ -35,13 +35,13 @@ bool gameInit(Game* game, int filas, int columnas) {
         return false;
     }
 
-    if(!laberintoCreate(&game->laberinto, filas, columnas, game->renderer)) {
+    if(!Maze_create(&game->maze, rows, columns, game->renderer)) {
         return false;
     }
 
     SDL_Surface* icon = IMG_Load("assets/icon.jpg");
     if(!icon) {
-        fprintf(stderr, "Error al cargar icono: %s", SDL_GetError());
+        fprintf(stderr, "Error al cargar icono: %s\n", SDL_GetError());
         return false;
     }
 
@@ -54,9 +54,9 @@ bool gameInit(Game* game, int filas, int columnas) {
     return true;
 }
 
-void gameClean(Game** game) {
-    if ((*game)->laberinto)
-        laberintoClean(&(*game)->laberinto, (*game)->laberinto->filas);
+void Game_clean(tGame** game) {
+    if ((*game)->maze)
+        Maze_clean(&(*game)->maze, (*game)->maze->rows);
 
     if((*game)->renderer) {
         SDL_DestroyRenderer((*game)->renderer);
@@ -73,7 +73,7 @@ void gameClean(Game** game) {
     *game = NULL;
 }
 
-void gameEvent(Game* game) {
+void Game_event(tGame* game) {
     while(SDL_PollEvent(&game->event)) {
         switch (game->event.type) {
         case SDL_QUIT:
@@ -92,23 +92,23 @@ void gameEvent(Game* game) {
     }
 }
 
-void gameDraw(Game* game) {
+void Game_draw(tGame* game) {
     SDL_RenderClear(game->renderer);
 
-    laberintoDraw(game->laberinto);
+    Maze_draw(game->maze);
 
     SDL_RenderPresent(game->renderer);
 }
 
-void gameUpdate(Game* game) {
-    
+void Game_update(tGame* game) {
+
 }
 
- void gameRunning(Game* game) {
+ void Game_running(tGame* game) {
     while (game->running) {
-        gameEvent(game);
+        Game_event(game);
 
-        gameDraw(game);
+        Game_draw(game);
 
         SDL_Delay(16);
     }

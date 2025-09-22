@@ -44,24 +44,25 @@
 		<Unit filename="headers/bool.h" />
 		<Unit filename="headers/game.h" />
 		<Unit filename="headers/ghost.h" />
-		<Unit filename="headers/laberinto.h" />
-		<Unit filename="headers/matriz.h" />
+		<Unit filename="headers/matrix.h" />
+		<Unit filename="headers/maze.h" />
 		<Unit filename="headers/player.h" />
 		<Unit filename="headers/textureManager.h" />
 		<Unit filename="headers/tlista.h" />
+		<Unit filename="headers/vector.h" />
 		<Unit filename="includes/game.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/ghost.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="includes/laberinto.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="includes/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="includes/matriz.c">
+		<Unit filename="includes/matrix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/maze.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/player.c">
@@ -71,6 +72,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/tlista.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/vector.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions />
