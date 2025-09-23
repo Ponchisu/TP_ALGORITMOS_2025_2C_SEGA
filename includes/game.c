@@ -96,7 +96,22 @@ void Game_update(tGame* game) {
  }
 
  void Game_handleEvents(tGame* game) {
-    if(!Maze_handleEvents(game->maze)) {
-        game->running = false;
+    while(SDL_PollEvent(&game->event)) {
+        switch (game->event.type) {
+        case SDL_QUIT:
+            game->running = false;
+            break;
+        case SDL_KEYDOWN:
+            switch (game->event.key.keysym.scancode) {
+            case SDL_SCANCODE_ESCAPE:
+                game->running = false;
+                break;
+            default:
+                break;
+            }
+        }
+        if(game->running == true) {
+            Maze_handleEvents(game->maze, &game->event);
+        }
     }
- }
+}
