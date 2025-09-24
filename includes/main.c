@@ -13,7 +13,7 @@ int main(void) {
     tGame* game;
 
     Game_create(&game);
-    if(!Game_init(game, 10, 10)) {
+    if(!Game_init(game)) {
         Game_clean(&game);
         return 0;
     }

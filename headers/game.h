@@ -7,6 +7,7 @@
 
 #include "../headers/maze.h"
 #include "../headers/bool.h"
+#include "../headers/config.h"
 
 typedef struct {
     SDL_Window* window;
@@ -17,7 +18,7 @@ typedef struct {
 } tGame;
 
 bool Game_create(tGame** game);
-bool Game_init(tGame* game, int rows, int columns);
+bool Game_init(tGame* game);
 void Game_clean(tGame** game);
 void Game_running(tGame* game);
 

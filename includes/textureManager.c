@@ -5,12 +5,13 @@ int compararIdTex(const void* a, const void* b);
 
 bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_Renderer* pRenderer) {
     SDL_Surface* pTempSurface = IMG_Load(fileName);
+    SDL_Texture* pTexture;
 
     if(pTempSurface == NULL){
         return false;
     }
 
-    SDL_Texture* pTexture = SDL_CreateTextureFromSurface(pRenderer, pTempSurface);
+    pTexture = SDL_CreateTextureFromSurface(pRenderer, pTempSurface);
 
     SDL_FreeSurface(pTempSurface);
 
@@ -34,6 +35,8 @@ bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_
 void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
 
     SDL_Rect srcRect;
+    tTexture texture;
+    SDL_Texture* tex;
 
     void* nodo = Vector_bsearch(vec, (void*)id, compararIdTex); //sacar cuando se saquen nodos
 
@@ -42,9 +45,9 @@ void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer
         return;
     }
 
-    tTexture texture = *(tTexture*)(nodo); //sacar cuando se saquen nodos
+    texture = *(tTexture*)(nodo); //sacar cuando se saquen nodos
 
-    SDL_Texture* tex = texture.texture;
+    tex = texture.texture;
 
     srcRect.w = WIDTH; //Cant de pixeles de ancho que tomamos de la imagen
     srcRect.h = HEIGTH;  //Cant de pixeles de alto que tomamos de la imagen

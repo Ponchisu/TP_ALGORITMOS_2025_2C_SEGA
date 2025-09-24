@@ -2,12 +2,13 @@
 
 void** Matrix_create(int rows, int columns, int sizeElem) {
     void** mat = malloc(sizeof(void*) * rows);
+    void** last;
 
     if(!mat) {
         return NULL;
     }
 
-    void** last = mat + rows - 1;
+    last = mat + rows - 1;
     for(void** i = mat; i <= last ; i++) {
         *i = malloc(sizeElem  * columns);
 
@@ -33,6 +34,7 @@ bool Matrix_loadFromFileTxt(void** mat, int rows, int columns, char* fileName, A
     int currentRow = 0;
     char line[SIZE_LINE];
     char* current;
+    FILE* pf;
 
     if(mat == NULL) {
         fprintf(stderr, "Error al abrir archivo\n");
@@ -44,7 +46,7 @@ bool Matrix_loadFromFileTxt(void** mat, int rows, int columns, char* fileName, A
         return false;
     }
 
-    FILE* pf = fopen(fileName, "rt");
+    pf = fopen(fileName, "rt");
     if(!pf) {
         fprintf(stderr, "Error al abrir archivo\n");
         return false;

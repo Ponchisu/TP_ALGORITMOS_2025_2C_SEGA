@@ -13,9 +13,16 @@ bool Game_create(tGame** game) {
     return true;
 }
 
-bool Game_init(tGame* game, int rows, int columns) {
+bool Game_init(tGame* game) {
+    int rows, columns, numLive, numGhost, numAwards, maxLives;  
+    SDL_Surface* icon;
+    
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
+        return false;
+    }
+
+    if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhost, &numAwards, &maxLives)) {
         return false;
     }
 
@@ -39,7 +46,7 @@ bool Game_init(tGame* game, int rows, int columns) {
         return false;
     }
 
-    SDL_Surface* icon = IMG_Load("assets/icon.jpg");
+    icon = IMG_Load("assets/icon.jpg");
     if(!icon) {
         fprintf(stderr, "Error al cargar icono: %s\n", SDL_GetError());
         return false;
