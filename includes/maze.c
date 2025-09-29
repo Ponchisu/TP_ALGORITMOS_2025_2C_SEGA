@@ -77,8 +77,8 @@ bool Maze_create(tMaze** pMaze, int rows, int columns, SDL_Renderer* render) {
     return true;
 }
 
-void Maze_clean(tMaze** pMaze, int rows) {
-    Matrix_clean((void**)(*pMaze)->maze, rows);
+void Maze_clean(tMaze** pMaze) {
+    Matrix_clean((void**)(*pMaze)->maze, (*pMaze)->rows);
 
     Vector_destroy(&(*pMaze)->vecTex);
 
@@ -110,41 +110,82 @@ void Maze_draw(tMaze* pMaze) {
     }
 }
 
-bool Maze_handleEvents(tMaze* pMaze, SDL_Event* event) {
+void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement) {
+    tMovement move;
+    strcpy(move.id, "player");
 
     if (event->type == SDL_KEYDOWN) {
         switch (event->key.keysym.sym) {
         case SDLK_RIGHT:
         case SDLK_d:
-            if(pMaze->maze[pMaze->player.y][pMaze->player.x + 1] != '#') {
-                pMaze->player.x += 1;
+            if(Cola_empty(colaTurn) == true && pMaze->maze[pMaze->player.y][pMaze->player.x + 1] != '#') {
+                move.movement = 'R';
+                Cola_put(colaTurn, &move, sizeof(tMovement));
+                Cola_put(colaMovement, &move.movement, sizeof(char));
             }
-            return true;
             break;
         case SDLK_LEFT:
         case SDLK_a:
-            if(pMaze->maze[pMaze->player.y][pMaze->player.x - 1] != '#') {
-                pMaze->player.x -= 1;
+            if(Cola_empty(colaTurn) == true && pMaze->maze[pMaze->player.y][pMaze->player.x - 1] != '#') {
+                move.movement = 'L';
+                Cola_put(colaTurn, &move, sizeof(tMovement));
+                Cola_put(colaMovement, &move.movement, sizeof(char));
             }
-            return true;
             break;
         case SDLK_DOWN:
         case SDLK_s:
-            if(pMaze->player.y < pMaze->rows - 1 && pMaze->maze[pMaze->player.y + 1][pMaze->player.x] != '#') {
-                pMaze->player.y += 1;
+            if(Cola_empty(colaTurn) == true && pMaze->player.y < pMaze->rows - 1 && pMaze->maze[pMaze->player.y + 1][pMaze->player.x] != '#') {
+                move.movement = 'D';
+                Cola_put(colaTurn, &move, sizeof(tMovement));
+                Cola_put(colaMovement, &move.movement, sizeof(char));
             }
-            return true;
             break;
         case SDLK_UP:
         case SDLK_w:
-            if(pMaze->player.y > 0 && pMaze->maze[pMaze->player.y - 1][pMaze->player.x] != '#') {
-                pMaze->player.y -= 1;
+            if(Cola_empty(colaTurn) == true && pMaze->player.y > 0 && pMaze->maze[pMaze->player.y - 1][pMaze->player.x] != '#') {
+                move.movement = 'A';
+                Cola_put(colaTurn, &move, sizeof(tMovement));
+                Cola_put(colaMovement, &move.movement, sizeof(char));
             }
-            return true;
             break;
         default:
             break;
         }
     }
-    return true;
+}
+
+void Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
+    tMovement move;
+
+    Cola_showFirst(colaTurn, &move, sizeof(tMovement));
+
+    if(strcmp(move.id, "player") == 0) {
+        // Realizar movimiento de todos los fantasmas y encolar ese movimiento
+    }
+}
+
+bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
+    tMovement move;
+
+    if(Cola_takeOut(colaTurn, &move, sizeof(tMovement)) == false) {
+        return false;
+    }
+
+    if(strcmp(move.id, "player") == 0) {
+        Player_movement(&pMaze->player, move.movement);
+        return true;
+    }
+
+    // Buscar id de fantasma y mover al fantasma
+
+    return false;
+}
+
+int Maze_check(tMaze* pMaze) {
+    
+    // chequear si el player toco un fantasma, OK si no toco
+    // si se toca un fantasma, el player volvera a la posIni, se restara una vida, se "matara" al fantasma tocado y se devolvera LOST_LIVE
+    // si el player es tocado y tiene 0 vidas se devuelve LOST y se da por perdido 
+
+    return OK;
 }

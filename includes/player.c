@@ -13,3 +13,22 @@ int Player_getX(tPlayer* player) {
 int Player_getY(tPlayer* player) {
     return player->y;
 }
+
+void Player_movement(tPlayer* player, char movement) {
+    if(movement == 'D') {
+        player->y ++;
+        return;
+    }
+    if(movement == 'A') {
+        player->y --;
+        return;
+    }
+    if(movement == 'L') {
+        player->x --;
+        return;
+    }
+    if(movement == 'R') {
+        player->x ++;
+        return;
+    }
+}

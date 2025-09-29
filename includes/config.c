@@ -5,7 +5,7 @@ bool Config_getValue(const char* line, int* number);
 
 
 bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* numGhost, int* numAwards, int* maxLives) {
-    FILE* pf = fopen(FILE_CONFIG, "rt");
+    FILE* pf;
     char line[SIZE_LINE_CONFIG];
     int parameter;
     int number;
@@ -17,6 +17,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     *numAwards = -1;
     *maxLives = -1;
 
+    pf = fopen(FILE_CONFIG, "rt");
     if(pf == NULL) {
         fprintf(stderr, "Error al abrir archivo config\n");
         return false;
@@ -27,7 +28,8 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
         if(parameter != -1 && Config_getValue(line, &number) == true) {
             switch (parameter) {
                 case ROWS:
-                    *rows = number;
+                    if(*rows == -1) 
+                        *rows = number;
                 break;
             case COLUMNS:
                     *columns = number;
@@ -59,11 +61,11 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
         return false;
     }
     if(*numLives == -1) {
-        fprintf(stderr, "Error no se ingresaro un numero de vidas valido\n");
+        fprintf(stderr, "Error no se ingresaron un numero de vidas valido\n");
         return false;
     }
     if(*numGhost == -1) {
-        fprintf(stderr, "Error no se ingresaro un numero de fantasma valido\n");
+        fprintf(stderr, "Error no se ingresaron un numero de fantasma valido\n");
         return false;
     }
     if(*numAwards == -1) {
@@ -80,12 +82,12 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
 
 int Config_getParameter(const char* line) {
     char vec[][SIZE_LINE_CONFIG] = {
-        "filas",
-        "columnas",
-        "vidas_inicio",
-        "maximo_numero_fantasmas",
-        "maximo_numero_premios",
-        "maximo_vidas_extra",
+        "rows",
+        "columns",
+        "lives_initial",
+        "number_of_ghost",
+        "number_of_award",
+        "lives_extra",
     };
 
     char copy[SIZE_LINE_CONFIG];

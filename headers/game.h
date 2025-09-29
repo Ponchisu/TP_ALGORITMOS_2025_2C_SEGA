@@ -8,6 +8,7 @@
 #include "../headers/maze.h"
 #include "../headers/bool.h"
 #include "../headers/config.h"
+#include "../headers/cola.h"
 
 typedef struct {
     SDL_Window* window;
@@ -15,6 +16,8 @@ typedef struct {
     SDL_Event event;
     tMaze* maze;
     bool running;
+    tCola colaTurn;
+    tCola colaMovement;
 } tGame;
 
 bool Game_create(tGame** game);
