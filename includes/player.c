@@ -1,9 +1,11 @@
 #include "../headers/player.h"
 
-void playerCreate(tPlayer* player, int y, int x) {
+void playerCreate(tPlayer* player, int y, int x, int numLives) {
     player->x = x;
     player->y = y;
-    player->lives = 3;
+    player->xStart = x;
+    player->yStart = y;
+    player->lives = numLives;
 }
 
 int Player_getX(tPlayer* player) {
@@ -19,7 +21,7 @@ void Player_movement(tPlayer* player, char movement) {
         player->y ++;
         return;
     }
-    if(movement == 'A') {
+    if(movement == 'U') {
         player->y --;
         return;
     }

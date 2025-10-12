@@ -17,7 +17,7 @@ typedef struct{
     char id[SIZE_ID];
 }tTexture;
 
-bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_Renderer* pRenderer);
-void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer* pRenderer);
+bool TextureManager_load(tVector* pVec, const char* fileName, const char* id, SDL_Renderer* pRenderer);
+void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, SDL_Renderer* pRenderer);
 
 #endif // TEXTUREMANAGER_H_INCLUDED

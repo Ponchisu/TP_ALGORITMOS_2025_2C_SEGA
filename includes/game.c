@@ -1,8 +1,8 @@
 #include "../headers/game.h"
 
-void Game_handleEvents(tGame* game);
-void Game_draw(tGame* game);
-void Game_update(tGame* game);
+void _Game_handleEvents(tGame* game);
+void _Game_draw(tGame* game);
+void _Game_update(tGame* game);
 
 bool Game_create(tGame** game) {
     *game = (tGame*)malloc(sizeof(tGame));
@@ -14,17 +14,21 @@ bool Game_create(tGame** game) {
 }
 
 bool Game_init(tGame* game) {
-    int rows, columns, numLive, numGhost, numAwards, maxLives;
+    int rows, columns, numLive, numGhosts, numAwards, maxLives;
     SDL_Surface* icon;
 
     game->maze = NULL;
+    game->renderer = NULL;
+    game->window = NULL;
+    game->colaMovement = NULL;
+    game->colaTurn = NULL;
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
     }
 
-    if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhost, &numAwards, &maxLives)) {
+    if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives)) {
         return false;
     }
 
@@ -44,7 +48,7 @@ bool Game_init(tGame* game) {
         return false;
     }
 
-    if(!Maze_create(&game->maze, rows, columns, game->renderer)) {
+    if(!Maze_create(&game->maze, game->renderer, rows, columns, numLive, numGhosts, numAwards, maxLives)) {
         return false;
     }
 
@@ -67,17 +71,27 @@ bool Game_init(tGame* game) {
 }
 
 void Game_clean(tGame** game) {
-    if ((*game)->maze) {
+    if ((*game)->maze != NULL) {
         Maze_clean(&(*game)->maze);
     }
 
-    if((*game)->renderer) {
+    if((*game)->renderer != NULL) {
         SDL_DestroyRenderer((*game)->renderer);
         (*game)->renderer = NULL;
     }
-    if((*game)->window) {
+    if((*game)->window != NULL) {
         SDL_DestroyWindow((*game)->window);
         (*game)->window = NULL;
+    }
+
+    if((*game)->colaMovement != NULL) {
+        Cola_clean(&(*game)->colaMovement);
+        (*game)->colaMovement = NULL;
+    }
+
+    if((*game)->colaTurn != NULL) {
+        Cola_clean(&(*game)->colaTurn);
+        (*game)->colaTurn = NULL;
     }
 
     SDL_Quit();
@@ -86,7 +100,7 @@ void Game_clean(tGame** game) {
     *game = NULL;
 }
 
-void Game_draw(tGame* game) {
+void _Game_draw(tGame* game) {
     SDL_RenderClear(game->renderer);
 
     Maze_draw(game->maze);
@@ -94,32 +108,33 @@ void Game_draw(tGame* game) {
     SDL_RenderPresent(game->renderer);
 }
 
-void Game_update(tGame* game) {
+void _Game_update(tGame* game) {
 
 }
 
  void Game_running(tGame* game) {
     int state = OK;
+    bool turn = false;
     while (game->running && state != LOST) {
-        Game_handleEvents(game);
+        if(turn == false) {
+            _Game_handleEvents(game);
+        }
 
-        Maze_ghostMovement(game->maze, &game->colaTurn); // verifica si el primer movimiento de la cola es del player, si lo es, mueve a los fantasmas
-
-        if(Maze_update(game->maze, &game->colaTurn) == true) { // desencola el movimiento y lo ejecura
+        if((turn = Maze_update(game->maze, &game->colaTurn)) == true) {
             state = Maze_check(game->maze); // comprueba si el player toco a un fantasma
         }
 
         if(state != OK) { // si el player toco a un fantasma se vacia la cola
-            Cola_clean(&game->colaTurn); 
+            Cola_clean(&game->colaTurn);
         }
 
-        Game_draw(game);
+        _Game_draw(game);
 
         SDL_Delay(16);
     }
  }
 
- void Game_handleEvents(tGame* game) {
+ void _Game_handleEvents(tGame* game) {
     while(SDL_PollEvent(&game->event)) {
         switch (game->event.type) {
         case SDL_QUIT:

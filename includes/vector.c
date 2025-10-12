@@ -1,184 +1,125 @@
 #include "../headers/vector.h"
 
-int Vector_create(Vector*v, unsigned tamVector){
+bool _Vector_resize(tVector* pVec, unsigned newCapacity);
 
-   v->vec = malloc(tamVector*(sizeof(tNodoV)));
-   if(!v->vec){
-    return 0;
-   }
+bool Vector_create(tVector* pVec, unsigned sizeElem, unsigned capacity) {
+    pVec->vec = malloc(sizeElem * capacity);
 
-   v->ce = 0;
-   v->tam = tamVector;
-
-   return 1;
-}
-
-void Vector_destroy(Vector*v) {
-    free(v->vec);
-    v->ce = 0;
-    v->tam = 0;
-}
-
-int Vector_insertInOrderNoRepeat(Vector* v, void* elemento, size_t tamDato, Cmp cmp) {
-
-    tNodoV nodo;
-    nodo.dato = malloc(tamDato);  // Reservamos memoria para el nuevo dato
-    if (!nodo.dato) return -1;
-
-    memcpy(nodo.dato, elemento, tamDato);
-    nodo.tam = tamDato;
-
-    void* search = Vector_bsearch(v,nodo.dato,cmp); //busca el elemento por la condicion
-
-    if(search){
-        memcpy(search,nodo.dato,tamDato); //si lo encuentra lo reemplaza y retorna 2
-        return 2;
+    if(pVec->vec == NULL) {
+        pVec->capacity = 0;
+        pVec->lotElem = 0;
+        pVec->sizeElem = 0;
+        pVec->vec = NULL;
+        return false;
     }
 
-    // Verificar si hay espacio para el nuevo elemento
-    if (v->ce == v->tam) {
-        if (Vector_resize(v, v->tam + 2) == -1) {
-            free(nodo.dato);
-            return -1;
+    pVec->capacity = capacity;
+    pVec->lotElem = 0;
+    pVec->sizeElem = sizeElem;
+    return true;
+}
+
+void Vector_clean(tVector* pVec) {
+    
+        free(pVec->vec);
+        pVec->capacity = 0;
+        pVec->lotElem = 0;
+        pVec->sizeElem = 0;
+        pVec->vec = NULL;
+}
+
+bool _Vector_resize(tVector* pVec, unsigned newCapacity) {
+    void* newVec = realloc(pVec->vec, newCapacity);
+    if(newVec == NULL) {
+        return false;
+    }
+
+    pVec->vec = newVec;
+    pVec->capacity = newCapacity;
+    return true;
+}
+
+bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update update) {
+    void* posIns;
+    void* last;
+
+    if (pVec->vec == NULL) {
+        return false;
+    }
+    
+    if(pVec->capacity == pVec->lotElem) {
+        if(!_Vector_resize(pVec, pVec->capacity * 1.5)) {
+            return false;
         }
     }
-
-    // Puntero al último nodo válido
-    tNodoV* actual = v->vec + v->ce - 1;
-
-    // Puntero a la posición donde vamos a insertar
-    tNodoV* destino = v->vec + v->ce;
-
-    // Desplazamos los elementos mayores
-    while (actual >= v->vec && cmp(nodo.dato, actual->dato) < 0) {
-        *destino = *actual;
-        destino--;
-        actual--;
+    posIns = pVec->vec;
+    last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
+    while (posIns <= last && cmp(elem, posIns) > 0) {
+        posIns += pVec->sizeElem;
     }
 
-    // Insertamos el nuevo nodo
-    *destino = nodo;
-    v->ce++;
-    return 1;
-}
-
-// Función para insertar en orden
-int Vector_insertInOrder(Vector* v, void* elemento, size_t tamDato, Cmp cmp) {
-
-    // Verificar si hay espacio para el nuevo elemento
-    if (v->ce == v->tam) {
-        if (Vector_resize(v, v->tam + 2) == -1) {
-            return -1;
+    if(posIns <= last && cmp(elem, posIns) == 0) {
+        if(update != NULL) {
+            update(posIns, elem);
         }
+        return false;
     }
 
-    tNodoV nodo;
-    nodo.dato = malloc(tamDato);  // Reservamos memoria para el nuevo dato
-    if (!nodo.dato) return -1;
-
-    memcpy(nodo.dato, elemento, tamDato);
-    nodo.tam = tamDato;
-
-    // Puntero al último nodo válido
-    tNodoV* actual = v->vec + v->ce - 1;
-
-    // Puntero a la posición donde vamos a insertar
-    tNodoV* destino = v->vec + v->ce;
-
-    // Desplazamos los elementos mayores
-    while (actual >= v->vec && cmp(nodo.dato, actual->dato) < 0) {
-        *destino = *actual;
-        destino--;
-        actual--;
+    for(void* i = last; i >= posIns; i -= pVec->sizeElem) {
+        memcpy(i + pVec->sizeElem, i, pVec->sizeElem);
     }
 
-    // Insertamos el nuevo nodo
-    *destino = nodo;
-    v->ce++;
-
-    return 1;
+    memcpy(posIns, elem, pVec->sizeElem);
+    pVec->lotElem ++;
+    return true;
 }
 
-// Función de búsqueda binaria
-void* Vector_bsearch(Vector* v, void* valor, Cmp cmp) {
-    tNodoV* ini = v->vec;
-    tNodoV* fin = v->vec + v->ce - 1;
+int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp) {
+    void* li = pVec->vec;
+    void* ls = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
+    void* mid = li + ((ls - li) / pVec->sizeElem / 2) * pVec->sizeElem;
+    int cmpCurent;
 
-    while (ini <= fin) {
-        tNodoV* medio = ini + (fin - ini) / 2;
-        int comp = cmp(valor, medio->dato);
+    if(pVec->lotElem == 0) {
+        return -1;
+    }
 
-        if (comp == 0) {   // Se encontró el valor
-            return medio->dato;  // Se retorna la direccion
+    while(li <= ls && (cmpCurent = cmp(elem, mid)) != 0) {
+        if(cmpCurent < 0) {
+            ls = mid - pVec->sizeElem;
         }
-        else
-        {
-            if (comp > 0) {
-                ini = medio + 1;
-            } else {
-                fin = medio - 1;
-            }
+        else {
+            li = mid + pVec->sizeElem;
         }
-    }
-    return NULL;  // No se encontró el valor
-}
-
-int Vector_getByPos(Vector* v, int pos, void * valor, size_t tamValor){
-
-    tNodoV* ini = ((v->vec) + pos);
-    void* aux = ini->dato;
-    int i;
-
-    if(v->ce!= 0 && pos<=v->ce && pos >= 0){
-      for(i=0;i<tamValor;i++){
-        *(char*)valor = *(char*)aux;
-        aux++;
-        valor++;
-      }
-      return 1;
+        mid = li + ((ls - li) / pVec->sizeElem / 2) * pVec->sizeElem;
     }
 
-    return -1;//si la posicion es incorrecta
-}
-
-void* Vector_getRefByPos(Vector* v, int pos){
-
-
-    if(pos>=v->ce){
-        return NULL;
+    if(li > ls) {
+        return -1;
     }
-    return (v->vec+pos)->dato;
 
+    memcpy(elem, mid, pVec->sizeElem);
+    return (mid - pVec->vec) / pVec->sizeElem;
 }
 
-size_t Vector_count(Vector* v){
-    return v->ce;
-}
+bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
+    void* posUpd;
+    void* last;
 
-int Vector_resize(Vector* v,size_t nuevoTamanio){
+    if(pVec->lotElem == 0) {
+        return false;
+    }
 
-  void * nv = realloc((void*)v->vec,nuevoTamanio*(sizeof(tNodoV)));
-  if(nv == NULL){
-    return -1;
-  }
-  v->vec = (tNodoV*)nv;
-  v->tam = nuevoTamanio;
-  return 1;
-}
+    posUpd = pVec->vec;
+    last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
+    while (posUpd <= last && cmp(elem, posUpd) > 0) {
+        posUpd += pVec->sizeElem;
+    }
 
-void Vector_map(Vector*v,Accion accion){
-  int i;
-  tNodoV* pivot= v->vec;
+    if(posUpd <= last && cmp(elem, posUpd) == 0) {
+        update(posUpd, elem);
+        return true;
+    }
 
-  for(i=0;i<v->ce;i++){
-    accion(pivot->dato);
-    pivot++;
-  }
-}
-
-//Función de comparación entre dos Nodos
-int compararInt(const void* a, const void* b) {
-    int valorA = *(int*)a;
-    int valorB = *(int*)b;
-    return (valorA - valorB);
+    return false;
 }

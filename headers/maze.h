@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <math.h>
 
 #include "../headers/bool.h"
 #include "../headers/matrix.h"
@@ -20,21 +21,24 @@
 #define LOST_LIVE 1
 #define LOST 2
 
+#define SIZE_VECTEX 6
+
 typedef struct
 {
     SDL_Renderer* render;
     char** maze;
     int rows;
     int columns;
+    int numGhosts;
     tPlayer player;
-    Vector vecTex;
+    tVector vecGhost;
+    tVector vecTex;
 }tMaze;
 
-bool Maze_create(tMaze** pMaze, int rows, int columns, SDL_Renderer* render);
+bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);
 void Maze_clean(tMaze** pMaze);
 void Maze_draw(tMaze* pMaze);
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement);
-void Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn);
 bool Maze_update(tMaze* pMaze, tCola* colaTurn);
 int Maze_check(tMaze* pMaze);
 

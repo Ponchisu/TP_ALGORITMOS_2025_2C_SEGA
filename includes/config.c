@@ -1,10 +1,10 @@
 #include "../headers/config.h"
 
-int Config_getParameter(const char* line);
-bool Config_getValue(const char* line, int* number);
+int _Config_getParameter(const char* line);
+bool _Config_getValue(const char* line, int* number);
 
 
-bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* numGhost, int* numAwards, int* maxLives) {
+bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* numGhosts, int* numAwards, int* maxLives) {
     FILE* pf;
     char line[SIZE_LINE_CONFIG];
     int parameter;
@@ -13,7 +13,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     *rows = -1;
     *columns = -1;
     *numLives = -1;
-    *numGhost = -1;
+    *numGhosts = -1;
     *numAwards = -1;
     *maxLives = -1;
 
@@ -24,8 +24,8 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     }
 
     while(fgets(line, SIZE_LINE_CONFIG, pf)) {
-        parameter = Config_getParameter(line);
-        if(parameter != -1 && Config_getValue(line, &number) == true) {
+        parameter = _Config_getParameter(line);
+        if(parameter != -1 && _Config_getValue(line, &number) == true) {
             switch (parameter) {
                 case ROWS:
                     if(*rows == -1) 
@@ -38,7 +38,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
                     *numLives = number;
                 break;
             case NUM_GHOST:
-                *numGhost = number;
+                *numGhosts = number;
                 break;
             case NUM_AWARDS:
                 *numAwards = number;
@@ -64,7 +64,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
         fprintf(stderr, "Error no se ingresaron un numero de vidas valido\n");
         return false;
     }
-    if(*numGhost == -1) {
+    if(*numGhosts == -1) {
         fprintf(stderr, "Error no se ingresaron un numero de fantasma valido\n");
         return false;
     }
@@ -80,7 +80,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     return true;
 }
 
-int Config_getParameter(const char* line) {
+int _Config_getParameter(const char* line) {
     char vec[][SIZE_LINE_CONFIG] = {
         "rows",
         "columns",
@@ -112,7 +112,7 @@ int Config_getParameter(const char* line) {
     return -1;
 }
 
-bool Config_getValue(const char* line, int* number) {
+bool _Config_getValue(const char* line, int* number) {
     char* colon;
     char* current;
 
@@ -127,7 +127,7 @@ bool Config_getValue(const char* line, int* number) {
     }
 
     if(*current == '\0') {
-        *number = atof(colon + 1);
+        *number = atoi(colon + 1);
         return true;
     } else
         return false;

@@ -1,9 +1,7 @@
 #include "../headers/textureManager.h"
-int compararTex (const void* a, const void* b);
-int compararIdTex(const void* a, const void* b);
+int _TextureManager_compararTex (const void* a, const void* b);
 
-
-bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_Renderer* pRenderer) {
+bool TextureManager_load(tVector* tVec, const char* fileName, const char* id, SDL_Renderer* pRenderer) {
     SDL_Surface* pTempSurface = IMG_Load(fileName);
     SDL_Texture* pTexture;
 
@@ -22,7 +20,7 @@ bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_
         strncpy(tex.id, id, SIZE_ID - 1);
         tex.id[SIZE_ID - 1] = '\0';
 
-        if(!Vector_insertInOrder(vec, &tex, sizeof(tTexture), compararTex)){
+        if(!Vector_insertInOrder(tVec, &tex, _TextureManager_compararTex, NULL)){
             return false;
         }
 
@@ -32,20 +30,19 @@ bool TextureManager_load(Vector* vec, const char* fileName, const char* id, SDL_
     return true;
 }
 
-void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
+void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
 
     SDL_Rect srcRect;
     tTexture texture;
     SDL_Texture* tex;
 
-    void* nodo = Vector_bsearch(vec, (void*)id, compararIdTex); //sacar cuando se saquen nodos
 
-    if(nodo == NULL){
+    strcpy(texture.id, id);
+
+    if(Vector_bsearch(pVec, &texture, _TextureManager_compararTex) == -1) {
         fprintf(stderr,"Error, la id '%s' no se encuentra.\n", id);
         return;
     }
-
-    texture = *(tTexture*)(nodo); //sacar cuando se saquen nodos
 
     tex = texture.texture;
 
@@ -57,16 +54,9 @@ void TextureManager_Draw(Vector* vec, const char* id, int y, int x, SDL_Renderer
     SDL_RenderCopy(pRenderer, tex, NULL, &srcRect);
 }
 
-int compararTex (const void* a, const void* b) {
+int _TextureManager_compararTex (const void* a, const void* b) {
     tTexture* a1 = (tTexture*)(a);
     tTexture* b1 = (tTexture*)(b);
 
     return strcmp(a1->id, b1->id);
-}
-
-int compararIdTex(const void* a, const void* b) {
-    char* elem = (char*)a;
-    tTexture* tex = (tTexture*)b;
-
-    return strcmp(elem, tex->id);
 }
