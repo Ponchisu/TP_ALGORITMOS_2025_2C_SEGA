@@ -1,9 +1,10 @@
 #include "../headers/ghost.h"
 
-void Ghost_create(tGhost* ghost, int y, int x, const char* id) {
-   strcpy(ghost->id, id);
-   ghost->x = x;
-   ghost->y = y;
+void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
+   strcpy(pGhost->id, id);
+   pGhost->x = x;
+   pGhost->y = y;
+   pGhost->isAlive = true;
 }
 
 int Ghost_cmp (const void* a, const void* b) {
@@ -15,35 +16,44 @@ int Ghost_cmp (const void* a, const void* b) {
 
 void Ghost_Update(void* elem1, const void* elem2) {
     tGhost* ghostUpd = (tGhost*) elem1;
-    const tGhost* ghost =(tGhost*) elem2;
+    const tGhost* pGhost =(tGhost*) elem2;
 
-    ghostUpd->x = ghost->x;
-    ghostUpd->y = ghost->y;
+    ghostUpd->x = pGhost->x;
+    ghostUpd->y = pGhost->y;
+    ghostUpd->isAlive = pGhost->isAlive;
 }
 
-int Ghost_getX(tGhost* ghost) {
-    return ghost->x;
+int Ghost_getX(tGhost* pGhost) {
+    return pGhost->x;
 }
 
-int Ghost_getY(tGhost* ghost) {
-    return ghost->y;
+int Ghost_getY(tGhost* pGhost) {
+    return pGhost->y;
 }
 
-void Ghost_movement(tGhost* ghost, char movement) {
+void Ghost_delete(tGhost* pGhost) {
+    pGhost->isAlive = false;
+}
+
+bool Ghost_isAlive(tGhost* pGhost) {
+    return pGhost->isAlive;
+}
+
+void Ghost_movement(tGhost* pGhost, char movement) {
     if(movement == 'D') {
-        ghost->y ++;
+        pGhost->y ++;
         return;
     }
     if(movement == 'U') {
-        ghost->y --;
+        pGhost->y --;
         return;
     }
     if(movement == 'L') {
-        ghost->x --;
+        pGhost->x --;
         return;
     }
     if(movement == 'R') {
-        ghost->x ++;
+        pGhost->x ++;
         return;
     }
 }

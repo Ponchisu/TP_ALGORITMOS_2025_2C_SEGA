@@ -41,11 +41,13 @@
 			<Add directory="SDL2/lib" />
 			<Add directory="SDL2_image/lib" />
 		</Linker>
+		<Unit filename="headers/awards.h" />
 		<Unit filename="headers/bool.h" />
 		<Unit filename="headers/cola.h" />
 		<Unit filename="headers/config.h" />
 		<Unit filename="headers/game.h" />
 		<Unit filename="headers/ghost.h" />
+		<Unit filename="headers/lives.h" />
 		<Unit filename="headers/matrix.h" />
 		<Unit filename="headers/maze.h" />
 		<Unit filename="headers/movement.h" />
@@ -53,6 +55,9 @@
 		<Unit filename="headers/textureManager.h" />
 		<Unit filename="headers/tlista.h" />
 		<Unit filename="headers/vector.h" />
+		<Unit filename="includes/awards.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="includes/cola.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -63,6 +68,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/ghost.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/lives.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/main.c">

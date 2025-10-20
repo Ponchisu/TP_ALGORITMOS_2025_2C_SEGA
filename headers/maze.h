@@ -14,6 +14,8 @@
 #include "../headers/vector.h"
 #include "../headers/cola.h"
 #include "../headers/movement.h"
+#include "../headers/awards.h"
+#include "../headers/lives.h"
 
 #define FILE_NAME "maze.txt"
 
@@ -21,7 +23,7 @@
 #define LOST_LIVE 1
 #define LOST 2
 
-#define SIZE_VECTEX 6
+#define SIZE_VECTEX 8
 
 typedef struct
 {
@@ -30,9 +32,13 @@ typedef struct
     int rows;
     int columns;
     int numGhosts;
+    int numAwards;
+    int numLives;
     tPlayer player;
     tVector vecGhost;
     tVector vecTex;
+    tVector vecLives;
+    tVector vecAwards;
 }tMaze;
 
 bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);

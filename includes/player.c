@@ -1,36 +1,49 @@
 #include "../headers/player.h"
 
-void playerCreate(tPlayer* player, int y, int x, int numLives) {
-    player->x = x;
-    player->y = y;
-    player->xStart = x;
-    player->yStart = y;
-    player->lives = numLives;
+void playerCreate(tPlayer* pPlayer, int y, int x, int numLives) {
+    pPlayer->x = x;
+    pPlayer->y = y;
+    pPlayer->xStart = x;
+    pPlayer->yStart = y;
+    pPlayer->lives = numLives;
 }
 
-int Player_getX(tPlayer* player) {
-    return player->x;
+int Player_getX(tPlayer* pPlayer) {
+    return pPlayer->x;
 }
 
-int Player_getY(tPlayer* player) {
-    return player->y;
+int Player_getY(tPlayer* pPlayer) {
+    return pPlayer->y;
 }
 
-void Player_movement(tPlayer* player, char movement) {
+int Player_getLives(tPlayer* pPlayer) {
+    return pPlayer->lives;
+}
+
+void Player_lostLives(tPlayer* pPlayer) {
+    pPlayer->lives --;
+}
+
+void Player_resetPos(tPlayer* pPlayer) {
+    pPlayer->x = pPlayer->xStart;
+    pPlayer->y = pPlayer->yStart;
+}
+
+void Player_movement(tPlayer* pPlayer, char movement) {
     if(movement == 'D') {
-        player->y ++;
+        pPlayer->y ++;
         return;
     }
     if(movement == 'U') {
-        player->y --;
+        pPlayer->y --;
         return;
     }
     if(movement == 'L') {
-        player->x --;
+        pPlayer->x --;
         return;
     }
     if(movement == 'R') {
-        player->x ++;
+        pPlayer->x ++;
         return;
     }
 }

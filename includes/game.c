@@ -116,17 +116,18 @@ void _Game_update(tGame* game) {
     int state = OK;
     bool turn = false;
     while (game->running && state != LOST) {
+        state = OK;
         if(turn == false) {
             _Game_handleEvents(game);
+        } else {
+            state = Maze_check(game->maze);
         }
-
-        if((turn = Maze_update(game->maze, &game->colaTurn)) == true) {
-            state = Maze_check(game->maze); // comprueba si el player toco a un fantasma
-        }
-
-        if(state != OK) { // si el player toco a un fantasma se vacia la cola
+        
+        if(state != OK) {
             Cola_clean(&game->colaTurn);
         }
+
+        turn = Maze_update(game->maze, &game->colaTurn);
 
         _Game_draw(game);
 
