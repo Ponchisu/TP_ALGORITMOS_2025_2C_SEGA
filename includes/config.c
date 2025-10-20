@@ -102,8 +102,7 @@ int _Config_getParameter(const char* line) {
     *colon = '\0';
 
     while(i < AMOUNT_PARAMETERS) {
-        if(strcmpi(copy, vec[i]) == 0)
-        {
+        if(strcmp(copy, vec[i]) == 0) {
             return i;
         }
         i++;

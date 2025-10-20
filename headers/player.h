@@ -17,6 +17,7 @@ int Player_getX(tPlayer* pPlayer);
 int Player_getY(tPlayer* pPlayer);
 int Player_getLives(tPlayer* pPlayer);
 void Player_lostLives(tPlayer* pPlayer);
+void Player_addLives(tPlayer* pPlayer);
 void Player_resetPos(tPlayer* pPlayer);
 void Player_movement(tPlayer* pPlayer, char movement);
 

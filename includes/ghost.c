@@ -7,10 +7,24 @@ void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
    pGhost->isAlive = true;
 }
 
+void Ghost_getId(tGhost* pGhost, char* string) {
+    strcpy(string, pGhost->id);
+}
+
+void Ghost_changeId(tGhost* pGhost, const char* string) {
+    strcpy(pGhost->id, string);
+}
+
+void Ghost_numId(tGhost* pGhost, int num) {
+    char idNum[SIZE_NUMID];
+    strcpy(pGhost->id, "ghost");
+    sprintf(idNum, "%d", num);
+    strcat(pGhost->id, idNum);
+}
+
 int Ghost_cmp (const void* a, const void* b) {
     tGhost* a1 = (tGhost*)(a);
     tGhost* b1 = (tGhost*)(b);
-
     return strcmp(a1->id, b1->id);
 }
 

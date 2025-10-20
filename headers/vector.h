@@ -14,6 +14,14 @@ typedef struct
     unsigned lotElem;
 }tVector;
 
+typedef struct {
+    void* first;
+    void* last;
+    void* current;
+    bool finishIter;
+    size_t sizeElem;
+}VectorIterator;
+
 typedef int (*Cmp)(const void* elem1, const void* elem2);
 typedef void (*Update)(void* elem1, const void* elem2);
 

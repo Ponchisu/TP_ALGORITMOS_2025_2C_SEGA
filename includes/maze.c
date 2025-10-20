@@ -7,8 +7,6 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int
     tGhost ghost;
     tAwards award;
     tLives live;
-    char id[10];
-    char idNum[10];
     int idGhost = 0;
     int idAwards = 0;
     int idLives = 0;
@@ -101,37 +99,30 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int
     for (int i = 0; i < (*pMaze)->rows; i++) {
         for (int j = 0; j < (*pMaze)->columns; j++) {
             if ((*pMaze)->maze[i][j] == 'G') {
-                strcpy(id, "ghost");
-                sprintf(idNum, "%d", idGhost);
-                strcat(id, idNum);
-                Ghost_create(&ghost, i, j, id);
+                Ghost_create(&ghost, i, j, "");
+                Ghost_numId(&ghost, idGhost);
                 if(!Vector_insertInOrder(&(*pMaze)->vecGhost, &ghost, Ghost_cmp, NULL)) {
                     return false;
                 }
                 idGhost++;
                 (*pMaze)->maze[i][j] = '.';
             } else if((*pMaze)->maze[i][j] == 'A') {
-                strcpy(id, "award");
-                sprintf(idNum, "%d", idAwards);
-                strcat(id, idNum);
-                Awards_create(&award, i, j, id);
+                Awards_create(&award, i, j, "");
+                Awards_numIde(&award, idAwards);
                 if(!Vector_insertInOrder(&(*pMaze)->vecAwards, &award, Awards_cmp, NULL)) {
                     return false;
                 }
                 idAwards++;
                 (*pMaze)->maze[i][j] = '.';
             } else if((*pMaze)->maze[i][j] == 'H') {
-                strcpy(id, "live");
-                sprintf(idNum, "%d", idLives);
-                strcat(id, idNum);
-                Lives_create(&live, i, j, id);
+                Lives_create(&live, i, j, "");
+                Lives_numId(&live, idLives);
                 if(!Vector_insertInOrder(&(*pMaze)->vecLives, &live, Lives_cmp, NULL)) {
-                    puts("a");
                     return false;
                 }
                 idLives++;
                 (*pMaze)->maze[i][j] = '.';
-            } else if ((*pMaze)->maze[i][j] == 'E') {
+            } else if ((*pMaze)->maze[i][j] == 'S') {
                 playerCreate(&(*pMaze)->player, i, j, numLives);
             }
         }
@@ -154,7 +145,6 @@ void Maze_clean(tMaze** pMaze) {
 }
 
 void Maze_draw(tMaze* pMaze) {
-    char idNum[25];
     tGhost ghost;
     tAwards award;
     tLives live;
@@ -167,31 +157,22 @@ void Maze_draw(tMaze* pMaze) {
             if (pMaze->maze[rows][col] == '.') {
                 TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
             }
-            if (pMaze->maze[rows][col] == 'E') {
+            if (pMaze->maze[rows][col] == 'S') {
                 TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH, col * WIDTH, pMaze->render);
                 TextureManager_Draw(&pMaze->vecTex, "starter", rows * HEIGTH, col * WIDTH, pMaze->render);
             }
-            if (pMaze->maze[rows][col] == 'S') {
+            if (pMaze->maze[rows][col] == 'E') {
                 TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
                 TextureManager_Draw(&pMaze->vecTex, "exit", rows * HEIGTH, col * WIDTH, pMaze->render);
             }
             if (pMaze->maze[rows][col] == 'F') {
                 TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
             }
-            if (pMaze->maze[rows][col] == 'P') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
-                TextureManager_Draw(&pMaze->vecTex, "award", rows * HEIGTH, col * WIDTH, pMaze->render);
-            }
-            if (pMaze->maze[rows][col] == 'H') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
-                TextureManager_Draw(&pMaze->vecTex, "heart", rows * HEIGTH, col * WIDTH, pMaze->render);
-            }
         }
         TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH,  Player_getX(&pMaze->player) * WIDTH, pMaze->render);
+
         for(int i = 0; i < pMaze->numGhosts; i++) {
-            strcpy(ghost.id, "ghost");
-            sprintf(idNum, "%d", i);
-            strcat(ghost.id, idNum);
+            Ghost_numId(&ghost, i);
             Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
 
             if(Ghost_isAlive(&ghost) == true) {
@@ -199,18 +180,20 @@ void Maze_draw(tMaze* pMaze) {
             }
         }
         for(int i = 0; i < pMaze->numAwards; i++) {
-            strcpy(award.id, "award");
-            sprintf(idNum, "%d", i);
-            strcat(award.id, idNum);
+            Awards_numIde(&award, i);
             Vector_bsearch(&pMaze->vecAwards, &award, Awards_cmp);
-            TextureManager_Draw(&pMaze->vecTex, "award", Awards_getY(&award) * HEIGTH, Awards_getX(&award) * WIDTH, pMaze->render);
+
+            if(Awards_isAlive(&award) == true) {
+                TextureManager_Draw(&pMaze->vecTex, "award", Awards_getY(&award) * HEIGTH, Awards_getX(&award) * WIDTH, pMaze->render);
+            }
         }
         for(int i = 0; i < pMaze->numLives; i++) {
-            strcpy(live.id, "live");
-            sprintf(idNum, "%d", i);
-            strcat(live.id, idNum);
+            Lives_numId(&live, i);
             Vector_bsearch(&pMaze->vecLives, &live, Lives_cmp);
-            TextureManager_Draw(&pMaze->vecTex, "heart", Lives_getY(&live) * HEIGTH, Lives_getX(&live) * WIDTH, pMaze->render);
+
+            if(Lives_isAlive(&live) == true) {
+                TextureManager_Draw(&pMaze->vecTex, "heart", Lives_getY(&live) * HEIGTH, Lives_getX(&live) * WIDTH, pMaze->render);
+            }
         }
     }
 }
@@ -265,7 +248,7 @@ void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* c
 
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
     int cant = pMaze->numGhosts;
-    char idNum[25];
+    char id[10];
     tGhost ghost;
     tMovement move;
     int xDist;
@@ -279,16 +262,15 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
     playerY = Player_getY(&pMaze->player);
 
     for(int i = 0; i < cant; i++) {
-            strcpy(ghost.id, "ghost");
-            sprintf(idNum, "%d", i);
-            strcat(ghost.id, idNum);
+            Ghost_numId(&ghost, i);
             Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
 
             ghostX = Ghost_getX(&ghost);
             ghostY = Ghost_getY(&ghost);
 
             if(Ghost_isAlive(&ghost) == true) {
-                strcpy(move.id, ghost.id);
+                Ghost_getId(&ghost, id);
+                strcpy(move.id, id);
 
                 xDist = abs(playerX - ghostX);
                 yDist = abs(playerY - ghostY);
@@ -327,7 +309,7 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
         return true;
     }
 
-    strcpy(ghost.id, move.id);
+    Ghost_changeId(&ghost, move.id);
 
     Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
     Ghost_movement(&ghost, move.movement);
@@ -342,9 +324,14 @@ int Maze_check(tMaze* pMaze) {
     int playerY;
     int ghostX;
     int ghostY;
+    int livesX;
+    int livesY;
+    int awardX;
+    int awardY;
     int lives;
     tGhost ghost;
-    char idNum[25];
+    tLives live;
+    tAwards award;
     int _return = OK;
     int i = 0;
 
@@ -352,10 +339,50 @@ int Maze_check(tMaze* pMaze) {
     playerY = Player_getY(&pMaze->player);
     lives = Player_getLives(&pMaze->player);
 
+    while(i <=  pMaze->numLives && _return == OK) {
+        Lives_numId(&live, i);
+        Vector_bsearch(&pMaze->vecLives, &live, Lives_cmp);
+        if(Lives_isAlive(&live) == true) {
+            livesX = Lives_getX(&live);
+            livesY = Lives_getY(&live);
+
+            if(livesX == playerX && livesY == playerY) {
+                _return = ADD_LIVE;
+                SDL_Delay(100);
+                Player_addLives(&pMaze->player);
+                Lives_delete(&live);
+                Vector_Update(&pMaze->vecLives, &live, Lives_cmp, Lives_update);
+                lives++;
+            }
+        }
+
+        i++;
+    }
+
+    _return = OK;
+    i = 0;
+    while(i <=  pMaze->numAwards && _return == OK) {
+        Awards_numIde(&award, i);
+        Vector_bsearch(&pMaze->vecAwards, &award, Awards_cmp);
+        if(Awards_isAlive(&award) == true) {
+            awardX = Awards_getX(&award);
+            awardY = Awards_getY(&award);
+
+            if(awardX == playerX && awardY == playerY) {
+                _return = GET_AWARD;
+                SDL_Delay(100);
+                Awards_delete(&award);
+                Vector_Update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
+            }
+        }
+
+        i++;
+    }
+
+    _return = OK;
+    i = 0;
     while(i <=  pMaze->numGhosts && _return == OK) {
-        strcpy(ghost.id, "ghost");
-        sprintf(idNum, "%d", i);
-        strcat(ghost.id, idNum);
+        Ghost_numId(&ghost, i);
         Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
         if(Ghost_isAlive(&ghost) == true) {
             ghostX = Ghost_getX(&ghost);
@@ -376,7 +403,7 @@ int Maze_check(tMaze* pMaze) {
             Ghost_delete(&ghost);
             Vector_Update(&pMaze->vecGhost, &ghost, Ghost_cmp, Ghost_Update);
             Player_resetPos(&pMaze->player);
-        } else 
+        } else
             _return = LOST;
     }
 

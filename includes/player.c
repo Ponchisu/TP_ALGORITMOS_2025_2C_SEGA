@@ -24,6 +24,10 @@ void Player_lostLives(tPlayer* pPlayer) {
     pPlayer->lives --;
 }
 
+void Player_addLives(tPlayer* pPlayer) {
+    pPlayer->lives ++;
+}
+
 void Player_resetPos(tPlayer* pPlayer) {
     pPlayer->x = pPlayer->xStart;
     pPlayer->y = pPlayer->yStart;

@@ -21,7 +21,9 @@
 
 #define OK 0
 #define LOST_LIVE 1
-#define LOST 2
+#define ADD_LIVE 2
+#define LOST 3
+#define GET_AWARD 4
 
 #define SIZE_VECTEX 8
 
