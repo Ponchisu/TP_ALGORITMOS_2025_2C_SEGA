@@ -16,6 +16,7 @@
 #include "../headers/movement.h"
 #include "../headers/awards.h"
 #include "../headers/lives.h"
+#include "../headers/margin.h"
 
 #define FILE_NAME "maze.txt"
 
@@ -29,22 +30,24 @@
 
 typedef struct
 {
-    SDL_Renderer* render;
+    SDL_Renderer* renderer;
     char** maze;
     int rows;
     int columns;
+    int points;
     tPlayer player;
     tVector vecGhost;
     tVector vecTex;
     tVector vecLives;
     tVector vecAwards;
+    tMargin margin;
 }tMaze;
 
 typedef bool (*Elem_isAlive)(const void* elem);
 typedef bool (*Elem_getY)(const void* elem);
 typedef bool (*Elem_getX)(const void* elem);
 
-bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);
+bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);
 void Maze_clean(tMaze** pMaze);
 void Maze_draw(tMaze* pMaze);
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement);

@@ -8,15 +8,18 @@ void playerCreate(tPlayer* pPlayer, int y, int x, int numLives) {
     pPlayer->lives = numLives;
 }
 
-int Player_getX(tPlayer* pPlayer) {
+int Player_getX(const void* elem) {
+    const tPlayer* pPlayer = elem;
     return pPlayer->x;
 }
 
-int Player_getY(tPlayer* pPlayer) {
+int Player_getY(const void* elem) {
+    const tPlayer* pPlayer = elem;
     return pPlayer->y;
 }
 
-int Player_getLives(tPlayer* pPlayer) {
+int Player_getLives(const void* elem) {
+    const tPlayer* pPlayer = elem;
     return pPlayer->lives;
 }
 

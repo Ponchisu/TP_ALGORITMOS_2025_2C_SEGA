@@ -6,6 +6,7 @@
 #include "../headers/bool.h"
 
 #define SIZE_NUMID 10
+#define LOST_POINTS 150
 
 typedef struct 
 {

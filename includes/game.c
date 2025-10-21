@@ -32,7 +32,7 @@ bool Game_init(tGame* game) {
         return false;
     }
 
-    game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + 50, 0);
+    game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + MARGIN_TOP, 0);
     if(!game->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
         return false;

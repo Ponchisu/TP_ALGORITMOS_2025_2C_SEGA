@@ -4,7 +4,7 @@ bool _Maze_checkWallCollision(tMaze* pMaze, int xPos, int yPos);
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn);
 void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, const char* id, unsigned tamElem, Elem_isAlive _Elem_isAlive, Elem_getY _Elem_getY, Elem_getX _Elem_getX);
 
-bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives) {
+bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives) {
     tGhost ghost;
     tAwards award;
     tLives live;
@@ -20,7 +20,9 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int
 
     (*pMaze)->rows = rows;
     (*pMaze)->columns = columns;
-    (*pMaze)->render = render;
+    (*pMaze)->renderer = renderer;
+    (*pMaze)->points = 0;
+
 
     (*pMaze)->maze = (char**)Matrix_create(rows, columns, sizeof(char));
     if((*pMaze)->maze == NULL) {
@@ -54,42 +56,47 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/starter.png", "starter", render)) {
+    if(!Margin_create(&(*pMaze)->margin, numLives, columns, renderer)) {
+        fprintf(stderr, "Error al crear margin\n");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/starter.png", "starter", renderer)) {
         fprintf(stderr, "Error al cargar imagen Entrada\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/exit.png", "exit", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/exit.png", "exit", renderer)) {
         fprintf(stderr, "Error al cargar imagen Salida\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/player.png", "player", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/player.png", "player", renderer)) {
         fprintf(stderr, "Error al cargar imagen Player\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/floor.png", "floor", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/floor.png", "floor", renderer)) {
         fprintf(stderr, "Error al cargar imagen Suelo\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/wall.png", "wall", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/wall.png", "wall", renderer)) {
         fprintf(stderr, "Error al cargar imagen Pared\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost.png", "ghost", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost.png", "ghost", renderer)) {
         fprintf(stderr, "Error al cargar imagen Fantasma\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/heart.png", "heart", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/heart.png", "heart", renderer)) {
         fprintf(stderr, "Error al cargar imagen Fantasma\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/award.png", "award", render)) {
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/award.png", "award", renderer)) {
         fprintf(stderr, "Error al cargar imagen Fantasma\n");
         return false;
     }
@@ -151,7 +158,7 @@ void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, cons
     VectorIterator_first(&vecIter, elem);
     while(!VectorIterator_finished(&vecIter)) {
         if(_Elem_isAlive(elem) == true) {
-            TextureManager_Draw(pVecTex, id, _Elem_getY(elem) * HEIGTH, _Elem_getX(elem) * WIDTH, pRender);
+            TextureManager_Draw(pVecTex, id, _Elem_getY(elem) * HEIGTH + MARGIN_TOP, _Elem_getX(elem) * WIDTH,  WIDTH, HEIGTH, pRender);
         }
         VectorIterator_next(&vecIter, elem);
     }
@@ -159,31 +166,32 @@ void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, cons
 }
 
 void Maze_draw(tMaze* pMaze) {
+    Margin_draw(&pMaze->margin, pMaze->renderer);
     for (int rows = 0; rows < pMaze->rows; rows++) {
         for (int col = 0; col < pMaze->columns; col++) {
             if (pMaze->maze[rows][col] == '#') {
-                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH, col * WIDTH, pMaze->render);
+                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == '.') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
+                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'S') {
-                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH, col * WIDTH, pMaze->render);
-                TextureManager_Draw(&pMaze->vecTex, "starter", rows * HEIGTH, col * WIDTH, pMaze->render);
+                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_Draw(&pMaze->vecTex, "starter", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'E') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
-                TextureManager_Draw(&pMaze->vecTex, "exit", rows * HEIGTH, col * WIDTH, pMaze->render);
+                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_Draw(&pMaze->vecTex, "exit", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'F') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH, col * WIDTH, pMaze->render);
+                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
         }
-        TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH,  Player_getX(&pMaze->player) * WIDTH, pMaze->render);
+        TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
 
-        _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->render, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
-        _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->render, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
-        _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->render, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
+        _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+        _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->renderer, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
+        _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->renderer, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
     }
 }
 
@@ -338,6 +346,7 @@ int Maze_check(tMaze* pMaze) {
                 Lives_delete(&live);
                 Vector_Update(&pMaze->vecLives, &live, Lives_cmp, Lives_update);
                 lives++;
+                Margin_updateLives(&pMaze->margin, lives);
             }
         }
         VectorIterator_next(&vecIter, &live);
@@ -356,6 +365,8 @@ int Maze_check(tMaze* pMaze) {
                 SDL_Delay(100);
                 Awards_delete(&award);
                 Vector_Update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
+                pMaze->points += GET_POINTS;
+                Margin_updatePoints(&pMaze->margin, pMaze->points);
             }
         }
         VectorIterator_next(&vecIter, &award);
@@ -380,11 +391,17 @@ int Maze_check(tMaze* pMaze) {
 
     if(_return == LOST_LIVE) {
         SDL_Delay(200);
+        if(pMaze->points >= 150) {
+            pMaze->points -= 150;
+            Margin_updatePoints(&pMaze->margin, pMaze->points);
+        }
         if(lives != 0) {
             Player_lostLives(&pMaze->player);
             Ghost_delete(&ghost);
             Vector_Update(&pMaze->vecGhost, &ghost, Ghost_cmp, Ghost_Update);
             Player_resetPos(&pMaze->player);
+            lives--;
+            Margin_updateLives(&pMaze->margin, lives);
         } else
             _return = LOST;
     }

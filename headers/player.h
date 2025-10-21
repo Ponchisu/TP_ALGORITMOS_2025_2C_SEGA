@@ -13,9 +13,9 @@ typedef struct {
 
 void playerCreate(tPlayer* pPlayer, int y, int x, int numLives) ;
 void playerUpdate();
-int Player_getX(tPlayer* pPlayer);
-int Player_getY(tPlayer* pPlayer);
-int Player_getLives(tPlayer* pPlayer);
+int Player_getX(const void* elem);
+int Player_getY(const void* elem);
+int Player_getLives(const void* elem);
 void Player_lostLives(tPlayer* pPlayer);
 void Player_addLives(tPlayer* pPlayer);
 void Player_resetPos(tPlayer* pPlayer);

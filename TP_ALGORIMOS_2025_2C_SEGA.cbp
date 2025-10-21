@@ -48,6 +48,7 @@
 		<Unit filename="headers/game.h" />
 		<Unit filename="headers/ghost.h" />
 		<Unit filename="headers/lives.h" />
+		<Unit filename="headers/margin.h" />
 		<Unit filename="headers/matrix.h" />
 		<Unit filename="headers/maze.h" />
 		<Unit filename="headers/movement.h" />
@@ -74,6 +75,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/margin.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/matrix.c">

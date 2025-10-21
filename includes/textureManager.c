@@ -30,7 +30,7 @@ bool TextureManager_load(tVector* tVec, const char* fileName, const char* id, SD
     return true;
 }
 
-void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, SDL_Renderer* pRenderer) {
+void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer) {
 
     SDL_Rect srcRect;
     tTexture texture;
@@ -46,8 +46,8 @@ void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, SDL_Render
 
     tex = texture.texture;
 
-    srcRect.w = WIDTH; //Cant de pixeles de ancho que tomamos de la imagen
-    srcRect.h = HEIGTH;  //Cant de pixeles de alto que tomamos de la imagen
+    srcRect.w = width; //Cant de pixeles de ancho que tomamos de la imagen
+    srcRect.h = heigth;  //Cant de pixeles de alto que tomamos de la imagen
     srcRect.x = x;                         //Pos horizontal en la pantalla
     srcRect.y = y;                         //Pos vertical en la pantalla
 
