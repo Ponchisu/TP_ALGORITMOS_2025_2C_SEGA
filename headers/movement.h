@@ -6,7 +6,8 @@
 typedef struct
 {
     char id[SIZE_MOVEMENT_ID];
-    char movement;
+    int vecX;
+    int vecY;
 }tMovement;
 
 

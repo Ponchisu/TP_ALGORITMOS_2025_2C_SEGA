@@ -122,7 +122,7 @@ void _Game_update(tGame* game) {
         } else {
             state = Maze_check(game->maze);
         }
-        
+
         if(state != OK) {
             Cola_clean(&game->colaTurn);
         }

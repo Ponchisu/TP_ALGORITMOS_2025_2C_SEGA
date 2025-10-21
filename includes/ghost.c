@@ -5,6 +5,8 @@ void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
    pGhost->x = x;
    pGhost->y = y;
    pGhost->isAlive = true;
+   pGhost->vecX = 0;
+   pGhost->vecY = 0;
 }
 
 void Ghost_getId(const tGhost* pGhost, char* string) {
@@ -56,21 +58,7 @@ bool Ghost_isAlive(const void* elem) {
     return pGhost->isAlive;
 }
 
-void Ghost_movement(tGhost* pGhost, char movement) {
-    if(movement == 'D') {
-        pGhost->y ++;
-        return;
-    }
-    if(movement == 'U') {
-        pGhost->y --;
-        return;
-    }
-    if(movement == 'L') {
-        pGhost->x --;
-        return;
-    }
-    if(movement == 'R') {
-        pGhost->x ++;
-        return;
-    }
+void Ghost_movement(tGhost* pGhost, tMovement move) {
+    pGhost->x += move.vecX;
+    pGhost->y += move.vecY;
 }

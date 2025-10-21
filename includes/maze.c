@@ -198,42 +198,51 @@ void Maze_draw(tMaze* pMaze) {
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement) {
     tMovement move;
     strcpy(move.id, "player");
+    char moveChar;
 
     if (event->type == SDL_KEYDOWN) {
         switch (event->key.keysym.sym) {
         case SDLK_RIGHT:
         case SDLK_d:
             if(Cola_empty(colaTurn) == true && !_Maze_checkWallCollision(pMaze, pMaze->player.x + 1, pMaze->player.y)) {
-                move.movement = 'R';
+                move.vecX = 1;
+                move.vecY = 0;
+                moveChar = 'R';
                 Cola_put(colaTurn, &move, sizeof(tMovement));
-                Cola_put(colaMovement, &move.movement, sizeof(char));
+                Cola_put(colaMovement, &moveChar, sizeof(char));
                 _Maze_ghostMovement(pMaze, colaTurn);
             }
             break;
         case SDLK_LEFT:
         case SDLK_a:
             if(Cola_empty(colaTurn) == true && !_Maze_checkWallCollision(pMaze, pMaze->player.x - 1, pMaze->player.y)) {
-                move.movement = 'L';
+                move.vecX = -1;
+                move.vecY = 0;
+                moveChar = 'L';
                 Cola_put(colaTurn, &move, sizeof(tMovement));
-                Cola_put(colaMovement, &move.movement, sizeof(char));
+                Cola_put(colaMovement, &moveChar, sizeof(char));
                 _Maze_ghostMovement(pMaze, colaTurn);
             }
             break;
         case SDLK_DOWN:
         case SDLK_s:
             if(Cola_empty(colaTurn) == true && !_Maze_checkWallCollision(pMaze, pMaze->player.x, pMaze->player.y + 1)) {
-                move.movement = 'D';
+                move.vecX = 0;
+                move.vecY = 1;
+                moveChar = 'D';
                 Cola_put(colaTurn, &move, sizeof(tMovement));
-                Cola_put(colaMovement, &move.movement, sizeof(char));
+                Cola_put(colaMovement, &moveChar, sizeof(char));
                 _Maze_ghostMovement(pMaze, colaTurn);
             }
             break;
         case SDLK_UP:
         case SDLK_w:
             if(Cola_empty(colaTurn) == true && !_Maze_checkWallCollision(pMaze, pMaze->player.x, pMaze->player.y - 1)) {
-                move.movement = 'U';
+                move.vecX = 0;
+                move.vecY = -1;
+                moveChar = 'U';
                 Cola_put(colaTurn, &move, sizeof(tMovement));
-                Cola_put(colaMovement, &move.movement, sizeof(char));
+                Cola_put(colaMovement, &moveChar, sizeof(char));
                 _Maze_ghostMovement(pMaze, colaTurn);
             }
             break;
@@ -273,18 +282,22 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
 
                 if (xDist > yDist) {
                     if (playerX < ghostX) {
-                        move.movement = 'L';
+                        move.vecX = -1;
+                        move.vecY = 0;
                     }
                     else {
-                        move.movement = 'R';
+                        move.vecX = 1;
+                        move.vecY = 0;
                     }
                 }
                 else {
                     if (playerY < ghostY) {
-                        move.movement = 'U';
+                        move.vecX = 0;
+                        move.vecY = -1;
                     }
                     else {
-                        move.movement = 'D';
+                        move.vecX = 0;
+                        move.vecY = 1;
                     }
                 }
                 Cola_put(colaTurn, &move, sizeof(tMovement));
@@ -302,14 +315,14 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
     }
 
     if(strcmp(move.id, "player") == 0) {
-        Player_movement(&pMaze->player, move.movement);
+        Player_movement(&pMaze->player, move);
         return true;
     }
 
     Ghost_changeId(&ghost, move.id);
 
     Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
-    Ghost_movement(&ghost, move.movement);
+    Ghost_movement(&ghost, move);
 
     Vector_Update(&pMaze->vecGhost, &ghost, Ghost_cmp, Ghost_Update);
 

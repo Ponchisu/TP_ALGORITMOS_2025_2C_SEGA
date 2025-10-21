@@ -36,21 +36,7 @@ void Player_resetPos(tPlayer* pPlayer) {
     pPlayer->y = pPlayer->yStart;
 }
 
-void Player_movement(tPlayer* pPlayer, char movement) {
-    if(movement == 'D') {
-        pPlayer->y ++;
-        return;
-    }
-    if(movement == 'U') {
-        pPlayer->y --;
-        return;
-    }
-    if(movement == 'L') {
-        pPlayer->x --;
-        return;
-    }
-    if(movement == 'R') {
-        pPlayer->x ++;
-        return;
-    }
+void Player_movement(tPlayer* pPlayer, tMovement move) {
+    pPlayer->x += move.vecX;
+    pPlayer->y += move.vecY;
 }

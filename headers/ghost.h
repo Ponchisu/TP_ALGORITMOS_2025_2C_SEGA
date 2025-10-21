@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "../headers/bool.h"
+#include "../headers/movement.h"
 
 #define SIZE_NUMID 10
 #define LOST_POINTS 150
@@ -13,7 +14,8 @@ typedef struct
     char id[10];
     int x;
     int y; 
-    int direction;
+    int vecX; 
+    int vecY; 
     bool isAlive;
 }tGhost;
 
@@ -27,6 +29,6 @@ int Ghost_getX(const void* pGhost);
 int Ghost_getY(const void* pGhost);
 void Ghost_delete(tGhost* pGhost);
 bool Ghost_isAlive(const void* pGhost);
-void Ghost_movement(tGhost* pGhost, char movement);
+void Ghost_movement(tGhost* pGhost, tMovement move);
 
 #endif // GHOST_H_INCLUDED

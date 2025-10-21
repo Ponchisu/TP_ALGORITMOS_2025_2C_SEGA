@@ -2,6 +2,7 @@
 #define PLAYER_H_INCLUDED
 
 #include <stdio.h>
+#include "../headers/movement.h"
 
 typedef struct {
     int xStart;
@@ -19,6 +20,6 @@ int Player_getLives(const void* elem);
 void Player_lostLives(tPlayer* pPlayer);
 void Player_addLives(tPlayer* pPlayer);
 void Player_resetPos(tPlayer* pPlayer);
-void Player_movement(tPlayer* pPlayer, char movement);
+void Player_movement(tPlayer* pPlayer, tMovement move);
 
 #endif // PLAYER_H_INCLUDED
