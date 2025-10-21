@@ -2,6 +2,7 @@
 
 bool _Maze_checkWallCollision(tMaze* pMaze, int xPos, int yPos);
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn);
+void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, const char* id, unsigned tamElem, Elem_isAlive _Elem_isAlive, Elem_getY _Elem_getY, Elem_getX _Elem_getX);
 
 bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives) {
     tGhost ghost;
@@ -20,9 +21,6 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int
     (*pMaze)->rows = rows;
     (*pMaze)->columns = columns;
     (*pMaze)->render = render;
-    (*pMaze)->numGhosts = numGhosts;
-    (*pMaze)->numAwards = numAwards;
-    (*pMaze)->numLives = maxLives;
 
     (*pMaze)->maze = (char**)Matrix_create(rows, columns, sizeof(char));
     if((*pMaze)->maze == NULL) {
@@ -144,11 +142,23 @@ void Maze_clean(tMaze** pMaze) {
     free(*pMaze);
 }
 
-void Maze_draw(tMaze* pMaze) {
-    tGhost ghost;
-    tAwards award;
-    tLives live;
+void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, const char* id, unsigned tamElem, Elem_isAlive _Elem_isAlive, Elem_getY _Elem_getY, Elem_getX _Elem_getX) {
+    tVectorIterator vecIter;
+    void* elem = malloc(tamElem);
 
+    VectorIterator_create(&vecIter, pVec);
+
+    VectorIterator_first(&vecIter, elem);
+    while(!VectorIterator_finished(&vecIter)) {
+        if(_Elem_isAlive(elem) == true) {
+            TextureManager_Draw(pVecTex, id, _Elem_getY(elem) * HEIGTH, _Elem_getX(elem) * WIDTH, pRender);
+        }
+        VectorIterator_next(&vecIter, elem);
+    }
+    free(elem);
+}
+
+void Maze_draw(tMaze* pMaze) {
     for (int rows = 0; rows < pMaze->rows; rows++) {
         for (int col = 0; col < pMaze->columns; col++) {
             if (pMaze->maze[rows][col] == '#') {
@@ -171,30 +181,9 @@ void Maze_draw(tMaze* pMaze) {
         }
         TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH,  Player_getX(&pMaze->player) * WIDTH, pMaze->render);
 
-        for(int i = 0; i < pMaze->numGhosts; i++) {
-            Ghost_numId(&ghost, i);
-            Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
-
-            if(Ghost_isAlive(&ghost) == true) {
-                TextureManager_Draw(&pMaze->vecTex, "ghost", Ghost_getY(&ghost) * HEIGTH, Ghost_getX(&ghost) * WIDTH, pMaze->render);
-            }
-        }
-        for(int i = 0; i < pMaze->numAwards; i++) {
-            Awards_numIde(&award, i);
-            Vector_bsearch(&pMaze->vecAwards, &award, Awards_cmp);
-
-            if(Awards_isAlive(&award) == true) {
-                TextureManager_Draw(&pMaze->vecTex, "award", Awards_getY(&award) * HEIGTH, Awards_getX(&award) * WIDTH, pMaze->render);
-            }
-        }
-        for(int i = 0; i < pMaze->numLives; i++) {
-            Lives_numId(&live, i);
-            Vector_bsearch(&pMaze->vecLives, &live, Lives_cmp);
-
-            if(Lives_isAlive(&live) == true) {
-                TextureManager_Draw(&pMaze->vecTex, "heart", Lives_getY(&live) * HEIGTH, Lives_getX(&live) * WIDTH, pMaze->render);
-            }
-        }
+        _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->render, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+        _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->render, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
+        _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->render, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
     }
 }
 
@@ -247,7 +236,7 @@ void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* c
 }
 
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
-    int cant = pMaze->numGhosts;
+    tVectorIterator vecIter;
     char id[10];
     tGhost ghost;
     tMovement move;
@@ -260,15 +249,14 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
 
     playerX = Player_getX(&pMaze->player);
     playerY = Player_getY(&pMaze->player);
+    VectorIterator_create(&vecIter, &pMaze->vecGhost);
 
-    for(int i = 0; i < cant; i++) {
-            Ghost_numId(&ghost, i);
-            Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
+    VectorIterator_first(&vecIter, &ghost);
+    while(!VectorIterator_finished(&vecIter)) {
+        ghostX = Ghost_getX(&ghost);
+        ghostY = Ghost_getY(&ghost);
 
-            ghostX = Ghost_getX(&ghost);
-            ghostY = Ghost_getY(&ghost);
-
-            if(Ghost_isAlive(&ghost) == true) {
+        if(Ghost_isAlive(&ghost) == true) {
                 Ghost_getId(&ghost, id);
                 strcpy(move.id, id);
 
@@ -293,6 +281,7 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
                 }
                 Cola_put(colaTurn, &move, sizeof(tMovement));
             }
+        VectorIterator_next(&vecIter, &ghost);
     }
 }
 
@@ -322,31 +311,27 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
 int Maze_check(tMaze* pMaze) {
     int playerX;
     int playerY;
-    int ghostX;
-    int ghostY;
-    int livesX;
-    int livesY;
-    int awardX;
-    int awardY;
+    int elemX;
+    int elemY;
     int lives;
     tGhost ghost;
     tLives live;
     tAwards award;
+    tVectorIterator vecIter;
     int _return = OK;
-    int i = 0;
 
     playerX = Player_getX(&pMaze->player);
     playerY = Player_getY(&pMaze->player);
     lives = Player_getLives(&pMaze->player);
 
-    while(i <=  pMaze->numLives && _return == OK) {
-        Lives_numId(&live, i);
-        Vector_bsearch(&pMaze->vecLives, &live, Lives_cmp);
+    VectorIterator_create(&vecIter, &pMaze->vecLives);
+    VectorIterator_first(&vecIter, &live);
+    while(!VectorIterator_finished(&vecIter) && _return == OK) {
         if(Lives_isAlive(&live) == true) {
-            livesX = Lives_getX(&live);
-            livesY = Lives_getY(&live);
+            elemX = Lives_getX(&live);
+            elemY = Lives_getY(&live);
 
-            if(livesX == playerX && livesY == playerY) {
+            if(elemX == playerX && elemY == playerY) {
                 _return = ADD_LIVE;
                 SDL_Delay(100);
                 Player_addLives(&pMaze->player);
@@ -355,45 +340,42 @@ int Maze_check(tMaze* pMaze) {
                 lives++;
             }
         }
-
-        i++;
+        VectorIterator_next(&vecIter, &live);
     }
 
     _return = OK;
-    i = 0;
-    while(i <=  pMaze->numAwards && _return == OK) {
-        Awards_numIde(&award, i);
-        Vector_bsearch(&pMaze->vecAwards, &award, Awards_cmp);
+    VectorIterator_create(&vecIter, &pMaze->vecAwards);
+    VectorIterator_first(&vecIter, &award);
+    while(!VectorIterator_finished(&vecIter) && _return == OK) {
         if(Awards_isAlive(&award) == true) {
-            awardX = Awards_getX(&award);
-            awardY = Awards_getY(&award);
+            elemX = Awards_getX(&award);
+            elemY = Awards_getY(&award);
 
-            if(awardX == playerX && awardY == playerY) {
+            if(elemX == playerX && elemY == playerY) {
                 _return = GET_AWARD;
                 SDL_Delay(100);
                 Awards_delete(&award);
                 Vector_Update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
             }
         }
-
-        i++;
+        VectorIterator_next(&vecIter, &award);
     }
 
     _return = OK;
-    i = 0;
-    while(i <=  pMaze->numGhosts && _return == OK) {
-        Ghost_numId(&ghost, i);
-        Vector_bsearch(&pMaze->vecGhost, &ghost, Ghost_cmp);
+    VectorIterator_create(&vecIter, &pMaze->vecGhost);
+    VectorIterator_first(&vecIter, &ghost);
+    while(!VectorIterator_finished(&vecIter) && _return == OK) {
         if(Ghost_isAlive(&ghost) == true) {
-            ghostX = Ghost_getX(&ghost);
-            ghostY = Ghost_getY(&ghost);
+            elemX = Ghost_getX(&ghost);
+            elemY = Ghost_getY(&ghost);
 
-            if(ghostX == playerX && ghostY == playerY) {
+            if(elemX == playerX && elemY == playerY) {
                 _return = LOST_LIVE;
             }
         }
-
-        i++;
+        if(_return == OK) {
+            VectorIterator_next(&vecIter, &ghost);
+        }
     }
 
     if(_return == LOST_LIVE) {

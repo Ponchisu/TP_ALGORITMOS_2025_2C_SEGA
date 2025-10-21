@@ -20,7 +20,7 @@ bool Vector_create(tVector* pVec, unsigned sizeElem, unsigned capacity) {
 }
 
 void Vector_clean(tVector* pVec) {
-    
+
         free(pVec->vec);
         pVec->capacity = 0;
         pVec->lotElem = 0;
@@ -46,7 +46,7 @@ bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update updat
     if (pVec->vec == NULL) {
         return false;
     }
-    
+
     if(pVec->capacity == pVec->lotElem) {
         if(!_Vector_resize(pVec, pVec->capacity * 1.5)) {
             return false;
@@ -122,4 +122,37 @@ bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
     }
 
     return false;
+}
+
+void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec) {
+    pVecIter->first = pVec->vec;
+    pVecIter->last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
+    pVecIter->current = pVec->vec;
+    pVecIter->sizeElem = pVec->sizeElem;
+    pVecIter->finishIter = false;
+}
+
+void VectorIterator_first(tVectorIterator* pVecIter, void* elem) {
+    if(pVecIter->first > pVecIter->last) {
+        return;
+    }
+
+    pVecIter->current = pVecIter->first;
+    pVecIter->finishIter = false;
+
+    memcpy(elem, pVecIter->current, pVecIter->sizeElem);
+}
+
+void VectorIterator_next(tVectorIterator* pVecIter, void* elem) {
+    if(pVecIter->current == pVecIter->last) {
+        pVecIter->finishIter = true;
+        return;
+    }
+
+    pVecIter->current += pVecIter->sizeElem;
+    memcpy(elem, pVecIter->current, pVecIter->sizeElem);
+}
+
+bool VectorIterator_finished(tVectorIterator* pVecIter) {
+    return pVecIter->finishIter;
 }

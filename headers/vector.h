@@ -18,9 +18,9 @@ typedef struct {
     void* first;
     void* last;
     void* current;
+    unsigned sizeElem;
     bool finishIter;
-    size_t sizeElem;
-}VectorIterator;
+}tVectorIterator;
 
 typedef int (*Cmp)(const void* elem1, const void* elem2);
 typedef void (*Update)(void* elem1, const void* elem2);
@@ -31,5 +31,9 @@ bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update updat
 int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp);
 bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update);
 
+void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec);
+void VectorIterator_first(tVectorIterator* pVecIter, void* elem);
+void VectorIterator_next(tVectorIterator* pVecIter, void* elem);
+bool VectorIterator_finished(tVectorIterator* pVecIter);
 
 #endif // VECTOR_H_INCLUDED

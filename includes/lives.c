@@ -26,11 +26,13 @@ void Lives_update(void* elem1, const void* elem2) {
     pLive1->isAlive = pLive2->isAlive;
 }
 
-int Lives_getX(tLives* pLives) {
+int Lives_getX(const void* elem) {
+    const tLives* pLives = elem;
     return pLives->x;
 }
 
-int Lives_getY(tLives* pLives) {
+int Lives_getY(const void* elem) {
+    const tLives* pLives = elem;
     return pLives->y;
 }
 
@@ -38,6 +40,7 @@ void Lives_delete(tLives* pLives) {
     pLives->isAlive = false;
 }
 
-bool Lives_isAlive(tLives* pLives) {
+bool Lives_isAlive(const void* elem) {
+    const tLives* pLives = elem;
     return pLives->isAlive;
 }

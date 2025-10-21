@@ -18,14 +18,14 @@ typedef struct
 
 void Ghost_create(tGhost* pGhost, int y, int x, const char* id);
 int Ghost_cmp (const void* a, const void* b);
-void Ghost_getId(tGhost* pGhost, char* string);
+void Ghost_getId(const tGhost* pGhost, char* string);
 void Ghost_changeId(tGhost* pGhost, const char* string);
 void Ghost_numId(tGhost* pGhost, int num);
 void Ghost_Update(void* elem1, const void* elem2);
-int Ghost_getX(tGhost* pGhost);
-int Ghost_getY(tGhost* pGhost);
+int Ghost_getX(const void* pGhost);
+int Ghost_getY(const void* pGhost);
 void Ghost_delete(tGhost* pGhost);
-bool Ghost_isAlive(tGhost* pGhost);
+bool Ghost_isAlive(const void* pGhost);
 void Ghost_movement(tGhost* pGhost, char movement);
 
 #endif // GHOST_H_INCLUDED

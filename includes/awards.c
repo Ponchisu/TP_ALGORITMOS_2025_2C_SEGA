@@ -26,11 +26,13 @@ void Awards_update(void* elem1, const void* elem2) {
     pAward1->isAlive = pAward2->isAlive;
 }
 
-int Awards_getX(tAwards* pAwards) {
+int Awards_getX(const void* elem) {
+    const tAwards* pAwards = elem;
     return pAwards->x;
 }
 
-int Awards_getY(tAwards* pAwards) {
+int Awards_getY(const void* elem) {
+    const tAwards* pAwards = elem;
     return pAwards->y;
 }
 
@@ -38,6 +40,7 @@ void Awards_delete(tAwards* pAwards) {
     pAwards->isAlive = false;
 }
 
-bool Awards_isAlive(tAwards* pAwards) {
+bool Awards_isAlive(const void* elem) {
+    const tAwards* pAwards = elem;
     return pAwards->isAlive;
 }

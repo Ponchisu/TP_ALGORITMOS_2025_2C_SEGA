@@ -33,15 +33,16 @@ typedef struct
     char** maze;
     int rows;
     int columns;
-    int numGhosts;
-    int numAwards;
-    int numLives;
     tPlayer player;
     tVector vecGhost;
     tVector vecTex;
     tVector vecLives;
     tVector vecAwards;
 }tMaze;
+
+typedef bool (*Elem_isAlive)(const void* elem);
+typedef bool (*Elem_getY)(const void* elem);
+typedef bool (*Elem_getX)(const void* elem);
 
 bool Maze_create(tMaze** pMaze, SDL_Renderer* render, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);
 void Maze_clean(tMaze** pMaze);

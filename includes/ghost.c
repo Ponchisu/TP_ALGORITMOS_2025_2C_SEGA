@@ -7,7 +7,7 @@ void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
    pGhost->isAlive = true;
 }
 
-void Ghost_getId(tGhost* pGhost, char* string) {
+void Ghost_getId(const tGhost* pGhost, char* string) {
     strcpy(string, pGhost->id);
 }
 
@@ -37,11 +37,13 @@ void Ghost_Update(void* elem1, const void* elem2) {
     ghostUpd->isAlive = pGhost->isAlive;
 }
 
-int Ghost_getX(tGhost* pGhost) {
+int Ghost_getX(const void* elem) {
+    const tGhost* pGhost = elem;
     return pGhost->x;
 }
 
-int Ghost_getY(tGhost* pGhost) {
+int Ghost_getY(const void* elem) {
+    const tGhost* pGhost = elem;
     return pGhost->y;
 }
 
@@ -49,7 +51,8 @@ void Ghost_delete(tGhost* pGhost) {
     pGhost->isAlive = false;
 }
 
-bool Ghost_isAlive(tGhost* pGhost) {
+bool Ghost_isAlive(const void* elem) {
+    const tGhost* pGhost = elem;
     return pGhost->isAlive;
 }
 
