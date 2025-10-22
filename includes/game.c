@@ -1,6 +1,6 @@
 #include "../headers/game.h"
 
-void _Game_handleEvents(tGame* game);
+void _Game_handleEvents(tGame* game, bool isGame);
 void _Game_draw(tGame* game);
 void _Game_update(tGame* game);
 
@@ -23,12 +23,16 @@ bool Game_init(tGame* game) {
     game->colaMovement = NULL;
     game->colaTurn = NULL;
 
-    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
     }
 
     if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives)) {
+        return false;
+    }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("Error al inicializar SDL_mixer: %s\n", Mix_GetError());
         return false;
     }
 
@@ -49,6 +53,13 @@ bool Game_init(tGame* game) {
     }
 
     if(!Maze_create(&game->maze, game->renderer, rows, columns, numLive, numGhosts, numAwards, maxLives)) {
+        return false;
+    }
+
+
+    game->music = Mix_LoadMUS("sound/music.mp3");
+    if(game->music == NULL) {
+        fprintf(stderr, "Error al cargar cancion: %s\n", Mix_GetError());
         return false;
     }
 
@@ -94,6 +105,9 @@ void Game_clean(tGame** game) {
         (*game)->colaTurn = NULL;
     }
 
+    Mix_FreeMusic((*game)->music);
+
+    Mix_CloseAudio();
     SDL_Quit();
 
     free(*game);
@@ -115,10 +129,12 @@ void _Game_update(tGame* game) {
  void Game_running(tGame* game) {
     int state = OK;
     bool turn = false;
-    while (game->running && state != LOST) {
+    Mix_PlayMusic(game->music, -1);
+    Mix_VolumeMusic(5); 
+    while (game->running && state != LOST && state != VICTORY) {
         state = OK;
         if(turn == false) {
-            _Game_handleEvents(game);
+            _Game_handleEvents(game, true);
         } else {
             state = Maze_check(game->maze);
         }
@@ -133,9 +149,29 @@ void _Game_update(tGame* game) {
 
         SDL_Delay(16);
     }
+
+    if(state == VICTORY) {
+        puts("Ganaste papu esc para salir");
+        Mix_HaltMusic(); 
+        while(game->running) {
+            _Game_handleEvents(game, false);
+            _Game_draw(game);
+            SDL_Delay(16);
+        }
+    }
+
+    if(state == LOST) {
+        puts("Perdiste papu esc para salir");
+        Mix_HaltMusic(); 
+        while(game->running) {
+            _Game_handleEvents(game, false);
+            _Game_draw(game);
+            SDL_Delay(16);
+        }
+    }
  }
 
- void _Game_handleEvents(tGame* game) {
+ void _Game_handleEvents(tGame* game, bool isGame) {
     while(SDL_PollEvent(&game->event)) {
         switch (game->event.type) {
         case SDL_QUIT:
@@ -152,7 +188,7 @@ void _Game_update(tGame* game) {
                 break;
             }
         }
-        if(game->running == true) {
+        if(game->running == true && isGame == true) {
             Maze_handleEvents(game->maze, &game->event, &game->colaTurn, &game->colaMovement);
         }
     }

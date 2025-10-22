@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <math.h>
 
 #include "../headers/bool.h"
@@ -25,6 +26,7 @@
 #define ADD_LIVE 2
 #define LOST 3
 #define GET_AWARD 4
+#define VICTORY 5
 
 #define SIZE_VECTEX 8
 

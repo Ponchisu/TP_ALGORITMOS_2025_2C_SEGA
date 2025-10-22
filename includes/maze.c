@@ -129,6 +129,7 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
                 (*pMaze)->maze[i][j] = '.';
             } else if ((*pMaze)->maze[i][j] == 'S') {
                 playerCreate(&(*pMaze)->player, i, j, numLives);
+            } else if((*pMaze)->maze[i][j] == 'E') {
             }
         }
     }
@@ -145,6 +146,7 @@ void Maze_clean(tMaze** pMaze) {
     Vector_clean(&(*pMaze)->vecGhost);
     Vector_clean(&(*pMaze)->vecAwards);
     Vector_clean(&(*pMaze)->vecLives);
+    Margin_clean(&(*pMaze)->margin);
 
     free(*pMaze);
 }
@@ -344,6 +346,10 @@ int Maze_check(tMaze* pMaze) {
     playerX = Player_getX(&pMaze->player);
     playerY = Player_getY(&pMaze->player);
     lives = Player_getLives(&pMaze->player);
+
+    if(pMaze->maze[playerY][playerX] == 'E') {
+        return VICTORY;
+    }
 
     VectorIterator_create(&vecIter, &pMaze->vecLives);
     VectorIterator_first(&vecIter, &live);

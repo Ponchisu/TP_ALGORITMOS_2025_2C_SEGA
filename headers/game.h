@@ -18,6 +18,7 @@ typedef struct {
     bool running;
     tCola colaTurn;
     tCola colaMovement;
+    Mix_Music* music;
 } tGame;
 
 bool Game_create(tGame** game);

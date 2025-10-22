@@ -6,7 +6,7 @@
 #include "../headers/textureManager.h"
 
 #define MARGIN_TOP 32
-#define SIZE_VECTEXMARGIN 13
+#define SIZE_VECTEXMARGIN 15
 #define LIVES_SIZE 3
 #define POINTS_SIZE 6
 

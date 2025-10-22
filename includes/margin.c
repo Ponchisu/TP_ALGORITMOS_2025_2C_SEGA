@@ -52,8 +52,16 @@ bool Margin_create(tMargin* pMargin, int lives, int width, SDL_Renderer* rendere
         fprintf(stderr, "Error al cargar imagen margin\n");
         return false;
     }
-    if(!TextureManager_load(&pMargin->vecTex, "assets/award.png", "award", renderer)) {
-        fprintf(stderr, "Error al cargar imagen award\n");
+    if(!TextureManager_load(&pMargin->vecTex, "assets/points.png", "points", renderer)) {
+        fprintf(stderr, "Error al cargar imagen points\n");
+        return false;
+    }
+    if(!TextureManager_load(&pMargin->vecTex, "assets/marginL.png", "marginL", renderer)) {
+        fprintf(stderr, "Error al cargar imagen marginL\n");
+        return false;
+    }
+    if(!TextureManager_load(&pMargin->vecTex, "assets/marginR.png", "marginR", renderer)) {
+        fprintf(stderr, "Error al cargar imagen marginR\n");
         return false;
     }
 
@@ -89,8 +97,11 @@ void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
     TextureManager_Draw(&pMargin->vecTex, lives, 0, WIDTH, WIDTH_NUMBERS, HEIGTH, renderer);
     TextureManager_Draw(&pMargin->vecTex, "xHeart", 0,  2 * WIDTH, WIDTH, HEIGTH, renderer);
 
+    TextureManager_Draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
+
     i = pMargin->width * WIDTH - WIDTH;
-    TextureManager_Draw(&pMargin->vecTex, "award", 0,  i, WIDTH, HEIGTH, renderer);
+    TextureManager_Draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
+    TextureManager_Draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
     number = strchr(points,  '\0');
     number --;
     TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
