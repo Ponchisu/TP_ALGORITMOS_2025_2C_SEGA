@@ -20,5 +20,6 @@ typedef struct{
 
 bool TextureManager_load(tVector* pVec, const char* fileName, const char* id, SDL_Renderer* pRenderer);
 void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer);
+void TextureManager_clean(tVector* pVec);
 
 #endif // TEXTUREMANAGER_H_INCLUDED

@@ -56,6 +56,31 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
+    if(!Vector_create(&(*pMaze)->vecCunk, sizeof(tChunk), SIZE_VECCHUNK)) {
+        fprintf(stderr, "Error al crear vector de chunk\n");
+        return false;
+    }
+    
+    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/points.wav", "points", 20)) {
+        fprintf(stderr, "Error al cargar sonido points\n");
+        return false;
+    }
+    
+    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/hit.wav", "hit", 20)) {
+        fprintf(stderr, "Error al cargar sonido hit\n");
+        return false;
+    }
+    
+    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/heart.wav", "heart", 20)) {
+        fprintf(stderr, "Error al cargar sonido heart\n");
+        return false;
+    }
+    
+    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/turn.wav", "turn", 10)) {
+        fprintf(stderr, "Error al cargar sonido turn\n");
+        return false;
+    }
+
     if(!Margin_create(&(*pMaze)->margin, numLives, columns, renderer)) {
         fprintf(stderr, "Error al crear margin\n");
         return false;
@@ -142,10 +167,13 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
 void Maze_clean(tMaze** pMaze) {
     Matrix_clean((void**)(*pMaze)->maze, (*pMaze)->rows);
 
+    TextureManager_clean(&(*pMaze)->vecTex);
     Vector_clean(&(*pMaze)->vecTex);
     Vector_clean(&(*pMaze)->vecGhost);
     Vector_clean(&(*pMaze)->vecAwards);
     Vector_clean(&(*pMaze)->vecLives);
+    SoundManager_cleanChunk(&(*pMaze)->vecCunk);
+    Vector_clean(&(*pMaze)->vecCunk);
     Margin_clean(&(*pMaze)->margin);
 
     free(*pMaze);
@@ -317,6 +345,7 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
     }
 
     if(strcmp(move.id, "player") == 0) {
+        SoundManager_playChunk(&pMaze->vecCunk, "turn");
         Player_movement(&pMaze->player, move);
         return true;
     }
@@ -360,6 +389,7 @@ int Maze_check(tMaze* pMaze) {
 
             if(elemX == playerX && elemY == playerY) {
                 _return = ADD_LIVE;
+                SoundManager_playChunk(&pMaze->vecCunk, "heart");
                 SDL_Delay(100);
                 Player_addLives(&pMaze->player);
                 Lives_delete(&live);
@@ -382,6 +412,7 @@ int Maze_check(tMaze* pMaze) {
             if(elemX == playerX && elemY == playerY) {
                 _return = GET_AWARD;
                 SDL_Delay(100);
+                SoundManager_playChunk(&pMaze->vecCunk, "points");
                 Awards_delete(&award);
                 Vector_Update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
                 pMaze->points += GET_POINTS;
@@ -410,6 +441,7 @@ int Maze_check(tMaze* pMaze) {
 
     if(_return == LOST_LIVE) {
         SDL_Delay(200);
+        SoundManager_playChunk(&pMaze->vecCunk, "hit");
         if(pMaze->points >= 150) {
             pMaze->points -= 150;
             Margin_updatePoints(&pMaze->margin, pMaze->points);

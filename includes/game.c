@@ -56,10 +56,22 @@ bool Game_init(tGame* game) {
         return false;
     }
 
+    if(!Vector_create(&game->vecMusic, sizeof(tMusic), SIZE_VECMUSIC)) {
+        return false;
+    }
 
-    game->music = Mix_LoadMUS("sound/music.mp3");
-    if(game->music == NULL) {
-        fprintf(stderr, "Error al cargar cancion: %s\n", Mix_GetError());
+    if(!SoundManager_loadMusic(&game->vecMusic, "sound/musicGame.mp3", "musicGame")) {
+        fprintf(stderr, "Error al cargar la cancion musicGame\n");
+        return false;
+    }
+
+    if(!SoundManager_loadMusic(&game->vecMusic, "sound/musicVictory.mp3", "musicVictory")) {
+        fprintf(stderr, "Error al cargar la cancion musicVictory\n");
+        return false;
+    }
+
+    if(!SoundManager_loadMusic(&game->vecMusic, "sound/musicLost.mp3", "musicLost")) {
+        fprintf(stderr, "Error al cargar la cancion musicLost\n");
         return false;
     }
 
@@ -105,7 +117,8 @@ void Game_clean(tGame** game) {
         (*game)->colaTurn = NULL;
     }
 
-    Mix_FreeMusic((*game)->music);
+    SoundManager_cleanMusic(&(*game)->vecMusic);
+    Vector_clean(&(*game)->vecMusic);
 
     Mix_CloseAudio();
     SDL_Quit();
@@ -129,8 +142,8 @@ void _Game_update(tGame* game) {
  void Game_running(tGame* game) {
     int state = OK;
     bool turn = false;
-    Mix_PlayMusic(game->music, -1);
-    Mix_VolumeMusic(5); 
+    SoundManager_playMusic(&game->vecMusic, "musicGame");
+    Mix_VolumeMusic(5);
     while (game->running && state != LOST && state != VICTORY) {
         state = OK;
         if(turn == false) {
@@ -152,7 +165,8 @@ void _Game_update(tGame* game) {
 
     if(state == VICTORY) {
         puts("Ganaste papu esc para salir");
-        Mix_HaltMusic(); 
+        Mix_HaltMusic();
+        SoundManager_playMusic(&game->vecMusic, "musicVictory");
         while(game->running) {
             _Game_handleEvents(game, false);
             _Game_draw(game);
@@ -162,7 +176,9 @@ void _Game_update(tGame* game) {
 
     if(state == LOST) {
         puts("Perdiste papu esc para salir");
-        Mix_HaltMusic(); 
+        Mix_HaltMusic();
+        Mix_VolumeMusic(15);
+        SoundManager_playMusic(&game->vecMusic, "musicLost");
         while(game->running) {
             _Game_handleEvents(game, false);
             _Game_draw(game);

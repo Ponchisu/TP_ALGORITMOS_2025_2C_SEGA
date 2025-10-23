@@ -18,6 +18,7 @@
 #include "../headers/awards.h"
 #include "../headers/lives.h"
 #include "../headers/margin.h"
+#include "../headers/soundManager.h"
 
 #define FILE_NAME "maze.txt"
 
@@ -29,6 +30,7 @@
 #define VICTORY 5
 
 #define SIZE_VECTEX 8
+#define SIZE_VECCHUNK 4
 
 typedef struct
 {
@@ -42,6 +44,7 @@ typedef struct
     tVector vecTex;
     tVector vecLives;
     tVector vecAwards;
+    tVector vecCunk;
     tMargin margin;
 }tMaze;
 

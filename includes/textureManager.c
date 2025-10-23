@@ -1,9 +1,10 @@
 #include "../headers/textureManager.h"
 int _TextureManager_compararTex (const void* a, const void* b);
 
-bool TextureManager_load(tVector* tVec, const char* fileName, const char* id, SDL_Renderer* pRenderer) {
+bool TextureManager_load(tVector* pVec, const char* fileName, const char* id, SDL_Renderer* pRenderer) {
     SDL_Surface* pTempSurface = IMG_Load(fileName);
     SDL_Texture* pTexture;
+    tTexture tex;
 
     if(pTempSurface == NULL){
         return false;
@@ -15,12 +16,11 @@ bool TextureManager_load(tVector* tVec, const char* fileName, const char* id, SD
 
 
     if(pTexture != NULL){
-        tTexture tex;
         tex.texture = pTexture;
         strncpy(tex.id, id, SIZE_ID - 1);
         tex.id[SIZE_ID - 1] = '\0';
 
-        if(!Vector_insertInOrder(tVec, &tex, _TextureManager_compararTex, NULL)){
+        if(!Vector_insertInOrder(pVec, &tex, _TextureManager_compararTex, NULL)){
             return false;
         }
 
@@ -59,4 +59,16 @@ int _TextureManager_compararTex (const void* a, const void* b) {
     tTexture* b1 = (tTexture*)(b);
 
     return strcmp(a1->id, b1->id);
+}
+
+void TextureManager_clean(tVector* pVec) {
+    tVectorIterator vecIter;
+    tTexture texture;
+    VectorIterator_create(&vecIter, pVec);
+
+    VectorIterator_first(&vecIter, &texture);
+    while (!VectorIterator_finished(&vecIter)) {
+        SDL_DestroyTexture(texture.texture);
+        VectorIterator_next(&vecIter, &texture);
+    }
 }

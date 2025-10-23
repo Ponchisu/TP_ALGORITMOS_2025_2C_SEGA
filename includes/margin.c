@@ -120,5 +120,6 @@ void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
 }
 
 void Margin_clean(tMargin* pMargin) {
+    TextureManager_clean(&pMargin->vecTex);
     Vector_clean(&pMargin->vecTex);
 }

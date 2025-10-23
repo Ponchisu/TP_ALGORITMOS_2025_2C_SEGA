@@ -9,6 +9,9 @@
 #include "../headers/bool.h"
 #include "../headers/config.h"
 #include "../headers/cola.h"
+#include "../headers/soundManager.h"
+
+#define SIZE_VECMUSIC 3
 
 typedef struct {
     SDL_Window* window;
@@ -18,7 +21,7 @@ typedef struct {
     bool running;
     tCola colaTurn;
     tCola colaMovement;
-    Mix_Music* music;
+    tVector vecMusic;
 } tGame;
 
 bool Game_create(tGame** game);
