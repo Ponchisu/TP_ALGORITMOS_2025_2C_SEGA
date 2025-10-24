@@ -3,6 +3,7 @@
 bool _Maze_checkWallCollision(tMaze* pMaze, int xPos, int yPos);
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn);
 void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, const char* id, unsigned tamElem, Elem_isAlive _Elem_isAlive, Elem_getY _Elem_getY, Elem_getX _Elem_getX);
+bool _Maze_ghostMovementIsValid(tMaze* pMaze, int newX, int newY);
 
 bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives) {
     tGhost ghost;
@@ -60,22 +61,22 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         fprintf(stderr, "Error al crear vector de chunk\n");
         return false;
     }
-    
+
     if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/points.wav", "points", 20)) {
         fprintf(stderr, "Error al cargar sonido points\n");
         return false;
     }
-    
+
     if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/hit.wav", "hit", 20)) {
         fprintf(stderr, "Error al cargar sonido hit\n");
         return false;
     }
-    
+
     if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/heart.wav", "heart", 20)) {
         fprintf(stderr, "Error al cargar sonido heart\n");
         return false;
     }
-    
+
     if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/turn.wav", "turn", 10)) {
         fprintf(stderr, "Error al cargar sonido turn\n");
         return false;
@@ -117,15 +118,14 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
     }
 
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/heart.png", "heart", renderer)) {
-        fprintf(stderr, "Error al cargar imagen Fantasma\n");
+        fprintf(stderr, "Error al cargar imagen corazon\n");
         return false;
     }
 
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/award.png", "award", renderer)) {
-        fprintf(stderr, "Error al cargar imagen Fantasma\n");
+        fprintf(stderr, "Error al cargar imagen premio\n");
         return false;
     }
-
     for (int i = 0; i < (*pMaze)->rows; i++) {
         for (int j = 0; j < (*pMaze)->columns; j++) {
             if ((*pMaze)->maze[i][j] == 'G') {
@@ -282,6 +282,45 @@ void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* c
     }
 }
 
+bool _Maze_ghostMovementIsValid(tMaze* pMaze, int newX, int newY) {
+    if(pMaze->maze[newY][newX] == '.') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void _Maze_ghostMovementInvertDir(int* dirX, int* dirY) {
+    *dirX = - *dirX;
+    *dirY = - *dirY;
+}
+
+bool _Maze_ghostMovementIsIntersection(tMaze* pMaze, int posX, int posY, int dirX, int dirY) {
+    int count = 0;
+
+    // Chequear las 4 direcciones cardinales
+    if (pMaze->maze[posY - 1][posX] == '.')  // arriba
+        count++; 
+    if (pMaze->maze[posY + 1][posX] == '.')  // abajo
+        count++;
+    if (pMaze->maze[posY][posX - 1] == '.')  // izquierda
+        count++;
+    if (pMaze->maze[posY][posX + 1] == '.')  // derecha
+        count++;
+
+    // Si el fantasma se mueve en alguna dirección, ignoramos la opuesta
+    if (dirX > 0 && pMaze->maze[posY][posX - 1] == '.') // venía de la izquierda
+        count--;
+    else if (dirX < 0 && pMaze->maze[posY][posX + 1] == '.') // venía de la derecha
+        count--;
+    else if (dirY > 0 && pMaze->maze[posY - 1][posX] == '.') // venía de arriba
+        count--;
+    else if (dirY < 0 && pMaze->maze[posY + 1][posX] == '.') // venía de abajo
+        count--;
+
+    return count > 1;
+}
+
 void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
     tVectorIterator vecIter;
     char id[10];
@@ -293,46 +332,83 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
     int playerY;
     int ghostX;
     int ghostY;
+    int dirX;
+    int dirY;
 
     playerX = Player_getX(&pMaze->player);
     playerY = Player_getY(&pMaze->player);
+    
     VectorIterator_create(&vecIter, &pMaze->vecGhost);
-
     VectorIterator_first(&vecIter, &ghost);
     while(!VectorIterator_finished(&vecIter)) {
-        ghostX = Ghost_getX(&ghost);
-        ghostY = Ghost_getY(&ghost);
-
         if(Ghost_isAlive(&ghost) == true) {
-                Ghost_getId(&ghost, id);
-                strcpy(move.id, id);
+            ghostX = Ghost_getX(&ghost);
+            ghostY = Ghost_getY(&ghost);
+            dirX = Ghost_getDirX(&ghost);
+            dirY = Ghost_getDirY(&ghost);
 
+            move.vecX = dirX;
+            move.vecY = dirY; 
+
+            if(_Maze_ghostMovementIsIntersection(pMaze, ghostX, ghostY, dirX, dirY) == true) {
                 xDist = abs(playerX - ghostX);
                 yDist = abs(playerY - ghostY);
-
                 if (xDist > yDist) {
-                    if (playerX < ghostX) {
+                    if (playerX < ghostX && dirX != 1 && _Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY)) {
                         move.vecX = -1;
                         move.vecY = 0;
-                    }
-                    else {
+                    } else if (playerX > ghostX && dirX != -1 && _Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY)) {
                         move.vecX = 1;
                         move.vecY = 0;
-                    }
-                }
-                else {
-                    if (playerY < ghostY) {
+                    } else if (dirY != 1 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1)) {
                         move.vecX = 0;
                         move.vecY = -1;
-                    }
-                    else {
+                    } else if (dirY != -1 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1)) {
                         move.vecX = 0;
                         move.vecY = 1;
                     }
-                }
-                Cola_put(colaTurn, &move, sizeof(tMovement));
+                } else {
+                    if (playerY < ghostY && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1) && dirY != 1) {
+                        move.vecX = 0;
+                        move.vecY = -1;
+                    } else if (playerY > ghostY && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1) && dirY != -1) {
+                        move.vecX = 0;
+                        move.vecY = 1;
+                    } else if (_Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY && dirX != 1)) {
+                        move.vecX = -1;
+                        move.vecY = 0;
+                    } else if (_Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY) && dirX != -1) {
+                        move.vecX = 1;
+                        move.vecY = 0;
+                    }
             }
-        VectorIterator_next(&vecIter, &ghost);
+            } else if(!_Maze_ghostMovementIsValid(pMaze, ghostX + dirX, ghostY + dirY)) {
+                if (dirX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY)) {
+                    move.vecX = -1; 
+                    move.vecY = 0;
+                }
+                else if (dirX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY)) {
+                    move.vecX = 1; 
+                    move.vecY = 0;
+                }
+                else if (dirY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1)) {
+                    move.vecX = 0; 
+                    move.vecY = 1;
+                }
+                else if (dirY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1)) {
+                    move.vecX = 0; 
+                    move.vecY = -1;
+                } else {
+                    _Maze_ghostMovementInvertDir(&dirX, &dirY);
+                    move.vecX = dirX;
+                    move.vecY = dirY;
+                }
+            }
+            Ghost_getId(&ghost, id);
+            strcpy(move.id, id);
+            Cola_put(colaTurn, &move, sizeof(tMovement));
+        }
+         VectorIterator_next(&vecIter, &ghost);
     }
 }
 

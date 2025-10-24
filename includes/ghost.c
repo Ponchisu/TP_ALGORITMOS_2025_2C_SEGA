@@ -7,6 +7,7 @@ void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
    pGhost->isAlive = true;
    pGhost->vecX = 0;
    pGhost->vecY = 0;
+
 }
 
 void Ghost_getId(const tGhost* pGhost, char* string) {
@@ -36,6 +37,8 @@ void Ghost_Update(void* elem1, const void* elem2) {
 
     ghostUpd->x = pGhost->x;
     ghostUpd->y = pGhost->y;
+    ghostUpd->vecX = pGhost->vecX;
+    ghostUpd->vecY = pGhost->vecY;
     ghostUpd->isAlive = pGhost->isAlive;
 }
 
@@ -47,6 +50,14 @@ int Ghost_getX(const void* elem) {
 int Ghost_getY(const void* elem) {
     const tGhost* pGhost = elem;
     return pGhost->y;
+}
+
+int Ghost_getDirX(const tGhost* pGhost) {
+    return pGhost->vecX;
+}
+
+int Ghost_getDirY(const tGhost* pGhost) {
+    return pGhost->vecY;
 }
 
 void Ghost_delete(tGhost* pGhost) {
@@ -61,4 +72,6 @@ bool Ghost_isAlive(const void* elem) {
 void Ghost_movement(tGhost* pGhost, tMovement move) {
     pGhost->x += move.vecX;
     pGhost->y += move.vecY;
+    pGhost->vecX = move.vecX;
+    pGhost->vecY = move.vecY;
 }

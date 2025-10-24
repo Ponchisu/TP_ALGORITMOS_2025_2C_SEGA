@@ -27,6 +27,8 @@ void Ghost_numId(tGhost* pGhost, int num);
 void Ghost_Update(void* elem1, const void* elem2);
 int Ghost_getX(const void* pGhost);
 int Ghost_getY(const void* pGhost);
+int Ghost_getDirX(const tGhost* pGhost);
+int Ghost_getDirY(const tGhost* pGhost);
 void Ghost_delete(tGhost* pGhost);
 bool Ghost_isAlive(const void* pGhost);
 void Ghost_movement(tGhost* pGhost, tMovement move);
