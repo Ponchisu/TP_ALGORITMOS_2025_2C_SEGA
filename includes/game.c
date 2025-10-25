@@ -36,7 +36,8 @@ bool Game_init(tGame* game) {
         return false;
     }
 
-    game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + MARGIN_TOP, 0);
+    // game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + MARGIN_TOP, 0);
+    game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 800, 0);
     if(!game->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
         return false;
@@ -53,6 +54,9 @@ bool Game_init(tGame* game) {
     }
 
     if(!Maze_create(&game->maze, game->renderer, rows, columns, numLive, numGhosts, numAwards, maxLives)) {
+        return false;
+    }
+    if(!Menu_create(&game->pMenu, game->window, game->renderer)) {
         return false;
     }
 
@@ -117,7 +121,11 @@ void Game_clean(tGame** game) {
         (*game)->colaTurn = NULL;
     }
 
-    SoundManager_cleanMusic(&(*game)->vecMusic);
+    Menu_clean(&(*game)->pMenu);
+ 
+    if(Vector_empty(&(*game)->vecMusic) == false) {
+        SoundManager_cleanMusic(&(*game)->vecMusic);
+    }
     Vector_clean(&(*game)->vecMusic);
 
     Mix_CloseAudio();
@@ -142,6 +150,9 @@ void _Game_update(tGame* game) {
  void Game_running(tGame* game) {
     int state = OK;
     bool turn = false;
+    game->running = Menu_running(game->pMenu);
+    SDL_SetWindowSize(game->window, Maze_getColumns(game->maze) * WIDTH, Maze_getRows(game->maze) * HEIGTH + MARGIN_TOP);
+    SDL_SetWindowPosition(game->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SoundManager_playMusic(&game->vecMusic, "musicGame");
     Mix_VolumeMusic(5);
     while (game->running && state != LOST && state != VICTORY) {

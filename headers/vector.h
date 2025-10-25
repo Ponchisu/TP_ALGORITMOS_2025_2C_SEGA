@@ -30,6 +30,7 @@ void Vector_clean(tVector* pVec);
 bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update update);
 int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp);
 bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update);
+bool Vector_empty(tVector* pVec);
 
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec);
 void VectorIterator_first(tVectorIterator* pVecIter, void* elem);

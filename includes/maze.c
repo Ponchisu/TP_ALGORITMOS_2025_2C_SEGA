@@ -172,7 +172,10 @@ void Maze_clean(tMaze** pMaze) {
     Vector_clean(&(*pMaze)->vecGhost);
     Vector_clean(&(*pMaze)->vecAwards);
     Vector_clean(&(*pMaze)->vecLives);
-    SoundManager_cleanChunk(&(*pMaze)->vecCunk);
+
+    if(Vector_empty(&(*pMaze)->vecCunk) == false) {
+        SoundManager_cleanChunk(&(*pMaze)->vecCunk);
+    }
     Vector_clean(&(*pMaze)->vecCunk);
     Margin_clean(&(*pMaze)->margin);
 
@@ -548,4 +551,13 @@ bool _Maze_checkWallCollision(tMaze* pMaze, int xPos, int yPos) {
         return true;
     }
     return false;
+}
+
+
+int Maze_getColumns(tMaze* pMaze) {
+    return pMaze->columns;
+}
+
+int Maze_getRows(tMaze* pMaze) {
+    return pMaze->rows;
 }

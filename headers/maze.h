@@ -58,5 +58,7 @@ void Maze_draw(tMaze* pMaze);
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement);
 bool Maze_update(tMaze* pMaze, tCola* colaTurn);
 int Maze_check(tMaze* pMaze);
+int Maze_getColumns(tMaze* pMaze);
+int Maze_getRows(tMaze* pMaze);
 
 #endif // MAZE_H_INCLUDED

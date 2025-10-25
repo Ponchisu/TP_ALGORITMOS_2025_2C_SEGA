@@ -124,6 +124,10 @@ bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
     return false;
 }
 
+bool Vector_empty(tVector* pVec) {
+    return pVec->lotElem == 0;
+}
+
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec) {
     pVecIter->first = pVec->vec;
     pVecIter->last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);

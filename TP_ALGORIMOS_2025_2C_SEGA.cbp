@@ -54,6 +54,7 @@
 		<Unit filename="headers/margin.h" />
 		<Unit filename="headers/matrix.h" />
 		<Unit filename="headers/maze.h" />
+		<Unit filename="headers/menu.h" />
 		<Unit filename="headers/movement.h" />
 		<Unit filename="headers/player.h" />
 		<Unit filename="headers/soundManager.h" />
@@ -88,6 +89,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/maze.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/menu.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/player.c">

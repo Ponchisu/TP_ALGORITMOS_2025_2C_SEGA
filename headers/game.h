@@ -10,6 +10,7 @@
 #include "../headers/config.h"
 #include "../headers/cola.h"
 #include "../headers/soundManager.h"
+#include "../headers/menu.h"
 
 #define SIZE_VECMUSIC 3
 
@@ -22,6 +23,7 @@ typedef struct {
     tCola colaTurn;
     tCola colaMovement;
     tVector vecMusic;
+    tMenu* pMenu;
 } tGame;
 
 bool Game_create(tGame** game);
