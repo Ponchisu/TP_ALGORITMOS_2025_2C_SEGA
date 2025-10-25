@@ -5,7 +5,7 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn);
 void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, const char* id, unsigned tamElem, Elem_isAlive _Elem_isAlive, Elem_getY _Elem_getY, Elem_getX _Elem_getX);
 bool _Maze_ghostMovementIsValid(tMaze* pMaze, int newX, int newY);
 
-bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives) {
+bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhosts, int numAwards, int maxLives, bool rei) {
     tGhost ghost;
     tAwards award;
     tLives live;
@@ -112,9 +112,16 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
-    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost.png", "ghost", renderer)) {
-        fprintf(stderr, "Error al cargar imagen Fantasma\n");
-        return false;
+    if(rei == false) {
+        if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost.png", "ghost", renderer)) {
+            fprintf(stderr, "Error al cargar imagen Fantasma\n");
+            return false;
+        }
+    } else {
+        if(!TextureManager_load(&(*pMaze)->vecTex, "assets/rei.png", "ghost", renderer)) {
+            fprintf(stderr, "Error al cargar imagen Fantasma\n");
+            return false;
+        }
     }
 
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/heart.png", "heart", renderer)) {

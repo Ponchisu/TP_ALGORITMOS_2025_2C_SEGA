@@ -15,6 +15,7 @@ bool Game_create(tGame** game) {
 
 bool Game_init(tGame* game) {
     int rows, columns, numLive, numGhosts, numAwards, maxLives;
+    bool rei;
     SDL_Surface* icon;
 
     game->maze = NULL;
@@ -22,13 +23,14 @@ bool Game_init(tGame* game) {
     game->window = NULL;
     game->colaMovement = NULL;
     game->colaTurn = NULL;
+    game->pMenu = NULL;
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
     }
 
-    if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives)) {
+    if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives, &rei)) {
         return false;
     }
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
@@ -53,7 +55,7 @@ bool Game_init(tGame* game) {
         return false;
     }
 
-    if(!Maze_create(&game->maze, game->renderer, rows, columns, numLive, numGhosts, numAwards, maxLives)) {
+    if(!Maze_create(&game->maze, game->renderer, rows, columns, numLive, numGhosts, numAwards, maxLives, rei)) {
         return false;
     }
     if(!Menu_create(&game->pMenu, game->window, game->renderer)) {
@@ -121,8 +123,11 @@ void Game_clean(tGame** game) {
         (*game)->colaTurn = NULL;
     }
 
-    Menu_clean(&(*game)->pMenu);
- 
+    if((*game)->pMenu != NULL) {
+        Menu_clean(&(*game)->pMenu);
+        (*game)->pMenu = NULL;
+    }
+
     if(Vector_empty(&(*game)->vecMusic) == false) {
         SoundManager_cleanMusic(&(*game)->vecMusic);
     }
@@ -151,10 +156,12 @@ void _Game_update(tGame* game) {
     int state = OK;
     bool turn = false;
     game->running = Menu_running(game->pMenu);
-    SDL_SetWindowSize(game->window, Maze_getColumns(game->maze) * WIDTH, Maze_getRows(game->maze) * HEIGTH + MARGIN_TOP);
-    SDL_SetWindowPosition(game->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    SoundManager_playMusic(&game->vecMusic, "musicGame");
-    Mix_VolumeMusic(5);
+    if(game->running == true) {
+        SDL_SetWindowSize(game->window, Maze_getColumns(game->maze) * WIDTH, Maze_getRows(game->maze) * HEIGTH + MARGIN_TOP);
+        SDL_SetWindowPosition(game->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SoundManager_playMusic(&game->vecMusic, "musicGame");
+        Mix_VolumeMusic(5);
+    }
     while (game->running && state != LOST && state != VICTORY) {
         state = OK;
         if(turn == false) {

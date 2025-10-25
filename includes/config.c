@@ -4,7 +4,7 @@ int _Config_getParameter(const char* line);
 bool _Config_getValue(const char* line, int* number);
 
 
-bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* numGhosts, int* numAwards, int* maxLives) {
+bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* numGhosts, int* numAwards, int* maxLives, bool* rei) {
     FILE* pf;
     char line[SIZE_LINE_CONFIG];
     int parameter;
@@ -16,6 +16,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     *numGhosts = -1;
     *numAwards = -1;
     *maxLives = -1;
+    *rei = false;
 
     pf = fopen(FILE_CONFIG, "rt");
     if(pf == NULL) {
@@ -25,7 +26,7 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
 
     while(fgets(line, SIZE_LINE_CONFIG, pf)) {
         parameter = _Config_getParameter(line);
-        if(parameter != -1 && _Config_getValue(line, &number) == true) {
+        if((parameter != -1 && _Config_getValue(line, &number) == true) || parameter == 6) {
             switch (parameter) {
                 case ROWS:
                     if(*rows == -1) 
@@ -45,6 +46,9 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
                 break;
             case MAX_LIVES:
                 *maxLives = number;
+                break;
+            case REI:
+                *rei = true;
                 break;
             }
         }
@@ -87,7 +91,8 @@ int _Config_getParameter(const char* line) {
         "lives_initial",
         "number_of_ghost",
         "number_of_award",
-        "lives_extra",
+        "lives_additional",
+        "rei",
     };
 
     char copy[SIZE_LINE_CONFIG];

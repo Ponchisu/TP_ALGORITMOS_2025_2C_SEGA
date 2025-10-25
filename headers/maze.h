@@ -52,7 +52,7 @@ typedef bool (*Elem_isAlive)(const void* elem);
 typedef bool (*Elem_getY)(const void* elem);
 typedef bool (*Elem_getX)(const void* elem);
 
-bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives);
+bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives, bool rei);
 void Maze_clean(tMaze** pMaze);
 void Maze_draw(tMaze* pMaze);
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement);

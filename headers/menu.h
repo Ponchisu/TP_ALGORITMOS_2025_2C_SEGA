@@ -11,7 +11,7 @@
 #include "../headers/vector.h"
 #include "../headers/textureManager.h"
 
-#define SIZE_VECTEXMEN 7
+#define SIZE_VECTEXMEN 10
 
 typedef struct
 {
@@ -21,6 +21,7 @@ typedef struct
     tVector vecTex;
     bool running;
     bool playGame;
+    bool showRanking;
     Mix_Music* music;
     SDL_Rect buttonPlay;
     bool buttonPlayH;
@@ -28,6 +29,8 @@ typedef struct
     bool buttonRankingH;
     SDL_Rect buttonQuit;
     bool buttonQuitH;
+    SDL_Rect buttonExit;
+    bool buttonExitH;
 }tMenu;
 
 bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer);
