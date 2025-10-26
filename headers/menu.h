@@ -23,6 +23,7 @@ typedef struct
     bool playGame;
     bool showRanking;
     Mix_Music* music;
+    Mix_Chunk* click;
     SDL_Rect buttonPlay;
     bool buttonPlayH;
     SDL_Rect buttonRanking;

@@ -19,6 +19,13 @@ bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
         return false;
     }
 
+    (*pMenu)->click = Mix_LoadWAV("sound/click.wav");
+    if((*pMenu)->click == NULL) {
+        fprintf(stderr, "Error al cargar sonido click\n");
+        return false;
+    }
+    Mix_VolumeChunk((*pMenu)->click, 15);
+
     if(!Vector_create(&(*pMenu)->vecTex, sizeof(tTexture), SIZE_VECTEXMEN)) {
         fprintf(stderr, "Error al crear vector\n");
         return false;
@@ -185,6 +192,7 @@ void _Menu_handleEvents(tMenu* pMenu) {
 
                     if (x >= pMenu->buttonPlay.x && x <= pMenu->buttonPlay.x + pMenu->buttonPlay.w && y >= pMenu->buttonPlay.y && y <= pMenu->buttonPlay.y + pMenu->buttonPlay.h) {
                         pMenu->playGame = true;
+                        Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
@@ -193,6 +201,7 @@ void _Menu_handleEvents(tMenu* pMenu) {
 
                     if (x >= pMenu->buttonRanking.x && x <= pMenu->buttonRanking.x + pMenu->buttonRanking.w && y >= pMenu->buttonRanking.y && y <= pMenu->buttonRanking.y + pMenu->buttonRanking.h) {
                         pMenu->showRanking = true;
+                        Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
@@ -200,6 +209,7 @@ void _Menu_handleEvents(tMenu* pMenu) {
                     y = pMenu->event.button.y;
 
                     if (x >= pMenu->buttonQuit.x && x <= pMenu->buttonQuit.x + pMenu->buttonQuit.w && y >= pMenu->buttonQuit.y && y <= pMenu->buttonQuit.y + pMenu->buttonQuit.h) {
+                        Mix_PlayChannel(-1, pMenu->click, 0);
                         pMenu->running = false;
                     }
                 }
@@ -276,6 +286,7 @@ void  _Menu_handleEventsRank(tMenu* pMenu) {
 
                     if (x >= pMenu->buttonExit.x && x <= pMenu->buttonExit.x + pMenu->buttonExit.w && y >= pMenu->buttonExit.y && y <= pMenu->buttonExit.y + pMenu->buttonExit.h) {
                         pMenu->showRanking = false;
+                        Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
                 break;

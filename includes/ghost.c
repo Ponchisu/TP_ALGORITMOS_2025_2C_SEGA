@@ -1,13 +1,19 @@
 #include "../headers/ghost.h"
 
-void Ghost_create(tGhost* pGhost, int y, int x, const char* id) {
+void Ghost_create(tGhost* pGhost, int y, int x, const char* id, int number) {
    strcpy(pGhost->id, id);
    pGhost->x = x;
    pGhost->y = y;
    pGhost->isAlive = true;
    pGhost->vecX = 0;
    pGhost->vecY = 0;
-
+   
+   if(number == 0) {
+    pGhost->tipeMove = FOLLOW;
+   } else {
+    pGhost->tipeMove = (rand() % 5);
+   }
+   printf("%s %d\n", id, pGhost->tipeMove);
 }
 
 void Ghost_getId(const tGhost* pGhost, char* string) {
@@ -31,7 +37,7 @@ int Ghost_cmp (const void* a, const void* b) {
     return strcmp(a1->id, b1->id);
 }
 
-void Ghost_Update(void* elem1, const void* elem2) {
+void Ghost_update(void* elem1, const void* elem2) {
     tGhost* ghostUpd = (tGhost*) elem1;
     const tGhost* pGhost =(tGhost*) elem2;
 
@@ -74,4 +80,8 @@ void Ghost_movement(tGhost* pGhost, tMovement move) {
     pGhost->y += move.vecY;
     pGhost->vecX = move.vecX;
     pGhost->vecY = move.vecY;
+}
+
+int Ghost_getTipeMove(tGhost* pGhost) {
+    return pGhost->tipeMove;
 }
