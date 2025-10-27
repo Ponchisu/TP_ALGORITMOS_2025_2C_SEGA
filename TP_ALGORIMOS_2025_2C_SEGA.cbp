@@ -34,15 +34,18 @@
 			<Add directory="SDL2/include/SDL2" />
 			<Add directory="SDL2_image/include" />
 			<Add directory="SDL2_mixer/include" />
+			<Add directory="SDL2_ttf/include" />
 		</Compiler>
 		<Linker>
 			<Add library="SDL2_image" />
 			<Add library="SDL2_mixer" />
 			<Add library="SDL2" />
 			<Add library="SDL2main" />
+			<Add library="SDL2_ttf" />
 			<Add directory="SDL2/lib" />
 			<Add directory="SDL2_image/lib" />
 			<Add directory="SDL2_mixer/lib" />
+			<Add directory="SDL2_ttf/lib" />
 		</Linker>
 		<Unit filename="headers/awards.h" />
 		<Unit filename="headers/bool.h" />

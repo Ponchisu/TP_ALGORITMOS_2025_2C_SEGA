@@ -5,8 +5,13 @@ void _Menu_draw(tMenu* pMenu);
 void _Menu_rankingShow(tMenu* pMenu);
 void  _Menu_handleEventsRank(tMenu* pMenu);
 void _Menu_drawRank(tMenu* pMenu);
+void _Menu_insertName(tMenu* pMenu, char* name);
+void _Menu_handleinsertName(tMenu* pMenu, char* pName);
+void _Menu_insertNameDraw(tMenu* pMenu, char* pName);
 
 bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
+    SDL_Color nameColor = {255, 255, 255, 255};
+    SDL_Surface* surface;
     *pMenu = (tMenu*)malloc(sizeof(tMenu));
     if(*pMenu == NULL) {
         fprintf(stderr, "Error al crear menu\n");
@@ -81,10 +86,18 @@ bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
         return false;
     }
 
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/manuName.png", "mName", renderer)) {
+        fprintf(stderr, "Error al cargar imagen manuName\n");
+        return false;
+    }
+
+    (*pMenu)->font = TTF_OpenFont("assets/Monocraft.ttf", 24);
+
     (*pMenu)->window = window;
     (*pMenu)->renderer = renderer;
 
     (*pMenu)->running = true;
+    (*pMenu)->runningName = true;
     (*pMenu)->playGame = false;
     (*pMenu)->showRanking = false;
 
@@ -112,6 +125,16 @@ bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
     (*pMenu)->buttonExit.w = 93;
     (*pMenu)->buttonExit.h = 59;
 
+    surface = TTF_RenderText_Solid((*pMenu)->font, "Insertar nombre:", nameColor);
+
+    (*pMenu)->insName = SDL_CreateTextureFromSurface(renderer, surface);
+    
+    (*pMenu)->rectInsName.x = 88;
+    (*pMenu)->rectInsName.y = 210;
+    (*pMenu)->rectInsName.w = surface->w;
+    (*pMenu)->rectInsName.h = surface->h;
+    
+    SDL_FreeSurface(surface);
     return true;
 }
 
@@ -126,9 +149,11 @@ void Menu_clean(tMenu** pMenu) {
     free(*pMenu);
 }
 
-bool Menu_running(tMenu* pMenu) {
+bool Menu_running(tMenu* pMenu, char* pName) {
     Mix_PlayMusic(pMenu->music, -1);
     Mix_VolumeMusic(15);
+
+    _Menu_insertName(pMenu, pName);
     while (pMenu->running == true && pMenu->playGame == false) {
         _Menu_handleEvents(pMenu);
 
@@ -221,7 +246,7 @@ void _Menu_handleEvents(tMenu* pMenu) {
   void _Menu_draw(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
 
-    TextureManager_Draw(&pMenu->vecTex, "menu", 0, 0, 600, 800, pMenu->renderer);
+    TextureManager_Draw(&pMenu->vecTex, "menu", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
     if(pMenu->buttonPlayH == true) {
         TextureManager_Draw(&pMenu->vecTex, "bPlayH", pMenu->buttonPlay.y, pMenu->buttonPlay.x, pMenu->buttonPlay.w, pMenu->buttonPlay.h, pMenu->renderer);
     }else {
@@ -306,3 +331,70 @@ void _Menu_drawRank(tMenu* pMenu) {
 
     SDL_RenderPresent(pMenu->renderer);
  }
+
+ void _Menu_insertName(tMenu* pMenu, char* pName) {
+    char name[SIZE_NAME] = " ";
+    char* spaceBar = name;
+    SDL_StartTextInput();
+    while (pMenu->runningName == true && pMenu->running == true) {
+        _Menu_handleinsertName(pMenu, name);
+
+        _Menu_insertNameDraw(pMenu, name);
+
+        SDL_Delay(16);
+    }
+    SDL_StopTextInput();
+    spaceBar++;
+    strcpy(pName, spaceBar);
+ }
+
+ void _Menu_handleinsertName(tMenu* pMenu, char* pName) {
+        while(SDL_PollEvent(&pMenu->event)) {
+        switch (pMenu->event.type) {
+        case SDL_QUIT:
+            puts("Enter para salir");
+            pMenu->running = false;
+            break;
+        case SDL_TEXTINPUT:
+                if (strlen(pName) + strlen(pMenu->event.text.text) < SIZE_NAME) {
+                    strcat(pName, pMenu->event.text.text);
+                }
+            break;
+        case SDL_KEYDOWN:
+            switch (pMenu->event.key.keysym.scancode) {
+            case SDL_SCANCODE_ESCAPE:
+                puts("Enter para salir");
+                pMenu->running = false;
+                break;
+            case SDL_SCANCODE_RETURN:
+                pMenu->runningName = false;
+                break;
+            case SDL_SCANCODE_BACKSPACE:
+                if(strlen(pName) > 1) {
+                    pName[strlen(pName) - 1] = '\0';
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void _Menu_insertNameDraw(tMenu* pMenu, char* pName) {
+    SDL_RenderClear(pMenu->renderer);
+
+    TextureManager_Draw(&pMenu->vecTex, "mName", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
+    SDL_RenderCopy(pMenu->renderer, pMenu->insName, NULL, &pMenu->rectInsName);
+
+    SDL_Color color = {255, 255, 255, 255};
+
+    SDL_Surface* surface = TTF_RenderText_Solid(pMenu->font, pName, color);
+    SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(pMenu->renderer, surface);
+    SDL_Rect nameRect = {200, 329, surface->w, surface->h};
+    SDL_RenderCopy(pMenu->renderer, nameTexture, NULL, &nameRect);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(nameTexture);
+
+    SDL_RenderPresent(pMenu->renderer);
+}

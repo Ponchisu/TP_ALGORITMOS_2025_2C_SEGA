@@ -108,7 +108,7 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
-    if(!Margin_create(&(*pMaze)->margin, numLives, columns, renderer)) {
+    if(!Margin_create(&(*pMaze)->margin, numLives, columns, SIZE_VECKEYS, renderer)) {
         fprintf(stderr, "Error al crear margin\n");
         return false;
     }
@@ -552,6 +552,7 @@ int Maze_check(tMaze* pMaze) {
                 Key_delete(&key);
                 Vector_Update(&pMaze->vecKeys, &key, Key_cmp, Key_update);
                 pMaze->keys --;
+                Margin_updateKey(&pMaze->margin, pMaze->keys);
                 if(pMaze->keys == 0) {
                     SoundManager_playChunk(&pMaze->vecChunk, "unluck");
                     pMaze->maze[pMaze->rows -1][rand() % (pMaze->columns - 2) + 1] = 'E';

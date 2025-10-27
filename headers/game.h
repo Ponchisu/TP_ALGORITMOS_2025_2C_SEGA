@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 
 #include "../headers/maze.h"
@@ -24,6 +25,7 @@ typedef struct {
     tCola colaMovement;
     tVector vecMusic;
     tMenu* pMenu;
+    char name[SIZE_NAME];
 } tGame;
 
 bool Game_create(tGame** game);

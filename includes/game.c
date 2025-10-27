@@ -32,6 +32,11 @@ bool Game_init(tGame* game) {
         return false;
     }
 
+    if (TTF_Init() == -1) {
+        printf("Error al inicializar SDL_ttf: %s\n", TTF_GetError());
+        return 1;
+    }
+
     if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives, &rei)) {
         return false;
     }
@@ -167,6 +172,7 @@ void Game_clean(tGame** game) {
 
     Mix_CloseAudio();
     SDL_Quit();
+    TTF_Quit();
 
     free(*game);
     *game = NULL;
@@ -188,7 +194,7 @@ void _Game_update(tGame* game) {
     int state = OK;
     bool turn = false;
     char ghostKill = 'X';
-    game->running = Menu_running(game->pMenu);
+    game->running = Menu_running(game->pMenu, game->name);
     if(game->running == true) {
         SDL_SetWindowSize(game->window, Maze_getColumns(game->maze) * WIDTH, Maze_getRows(game->maze) * HEIGTH + MARGIN_TOP);
         SDL_SetWindowPosition(game->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);

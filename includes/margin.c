@@ -1,6 +1,6 @@
 #include "../headers/margin.h"
 
-bool Margin_create(tMargin* pMargin, int lives, int width, SDL_Renderer* renderer) {
+bool Margin_create(tMargin* pMargin, int lives, int width, int key, SDL_Renderer* renderer) {
     if(Vector_create(&pMargin->vecTex, sizeof(tTexture), SIZE_VECTEXMARGIN) == false) {
         return false;
     }
@@ -81,7 +81,13 @@ bool Margin_create(tMargin* pMargin, int lives, int width, SDL_Renderer* rendere
         return false;
     }
 
+    if(!TextureManager_load(&pMargin->vecTex, "assets/key.png", "key", renderer)) {
+        fprintf(stderr, "Error al cargar imagen lostH\n");
+        return false;
+    }
+
     sprintf(pMargin->lives, "%02d", lives);
+    sprintf(pMargin->keys, "%d", key);
     strcpy(pMargin->points, "00000");
     pMargin->width = width;
 
@@ -97,6 +103,10 @@ void Margin_updateLives(tMargin* pMargin, int lives) {
 
 void Margin_updatePoints(tMargin* pMargin, int points) {
     sprintf(pMargin->points, "%05d", points);
+}
+
+void Margin_updateKey(tMargin* pMargin, int key) {
+    sprintf(pMargin->keys, "%d", key);
 }
 
 void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
@@ -117,6 +127,13 @@ void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
     TextureManager_Draw(&pMargin->vecTex, "xHeart", 0,  2 * WIDTH, WIDTH, HEIGTH, renderer);
 
     TextureManager_Draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
+
+    i = pMargin->width / 2 * WIDTH - WIDTH;
+    strcpy(lives, pMargin->keys);
+
+    TextureManager_Draw(&pMargin->vecTex, lives, 0, i + WIDTH_NUMBERS, WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_Draw(&pMargin->vecTex, "key", 0, i + WIDTH, WIDTH, HEIGTH, renderer);
+
 
     i = pMargin->width * WIDTH - WIDTH;
     TextureManager_Draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
@@ -216,7 +233,7 @@ void Margin_drawLost(tMargin* pMargin, SDL_Renderer* renderer) {
 
 void Margin_clean(tMargin* pMargin) {
     if(Vector_empty(&pMargin->vecTex) == false) {
-        TextureManager_clean(&pMargin->vecTex); 
+        TextureManager_clean(&pMargin->vecTex);
     }
     Vector_clean(&pMargin->vecTex);
 }
