@@ -1,7 +1,7 @@
 #include "../headers/game.h"
 
 void _Game_handleEvents(tGame* game, bool isGame);
-void _Game_draw(tGame* game);
+void _Game_draw(tGame* game, int marginDraw);
 void _Game_update(tGame* game);
 
 bool Game_create(tGame** game) {
@@ -25,6 +25,8 @@ bool Game_init(tGame* game) {
     game->colaTurn = NULL;
     game->pMenu = NULL;
 
+    Vector_init(&game->vecMusic);
+
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
@@ -33,12 +35,42 @@ bool Game_init(tGame* game) {
     if(!Config_getParametersFromFile(&rows, &columns, &numLive, &numGhosts, &numAwards, &maxLives, &rei)) {
         return false;
     }
+
+    if(numGhosts < 1 || numGhosts > 20) {
+        fprintf(stderr, "Numero de fantasmas invalido\n");
+        return false;
+    }
+
+    if(columns < 15 || columns > 31) {
+        fprintf(stderr, "Numero de columnas invalido\n");
+        return false;
+    }
+
+    if(rows < 15 || rows > 31) {
+        fprintf(stderr, "Numero de filas invalido\n");
+        return false;
+    }
+
+    if(numLive < 0 || numLive > 10) {
+        fprintf(stderr, "Numero de vidas invalido\n");
+        return false;
+    }
+
+    if(numAwards < 1 || numLive > 20) {
+        fprintf(stderr, "Numero de premios invalido\n");
+        return false;
+    }
+
+    if(maxLives < 1 || MAX_LIVES > 15) {
+        fprintf(stderr, "Numero de vidas extras invalido\n");
+        return false;
+    }
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         printf("Error al inicializar SDL_mixer: %s\n", Mix_GetError());
         return false;
     }
 
-    // game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, columns * WIDTH, rows * HEIGTH + MARGIN_TOP, 0);
     game->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 800, 0);
     if(!game->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
@@ -140,10 +172,10 @@ void Game_clean(tGame** game) {
     *game = NULL;
 }
 
-void _Game_draw(tGame* game) {
+void _Game_draw(tGame* game, int marginDraw) {
     SDL_RenderClear(game->renderer);
 
-    Maze_draw(game->maze);
+    Maze_draw(game->maze, marginDraw);
 
     SDL_RenderPresent(game->renderer);
 }
@@ -155,6 +187,7 @@ void _Game_update(tGame* game) {
  void Game_running(tGame* game) {
     int state = OK;
     bool turn = false;
+    char ghostKill = 'X';
     game->running = Menu_running(game->pMenu);
     if(game->running == true) {
         SDL_SetWindowSize(game->window, Maze_getColumns(game->maze) * WIDTH, Maze_getRows(game->maze) * HEIGTH + MARGIN_TOP);
@@ -174,9 +207,13 @@ void _Game_update(tGame* game) {
             Cola_clean(&game->colaTurn);
         }
 
+        if(state == LOST_LIVE) {
+            Cola_put(&game->colaMovement, &ghostKill, sizeof(char));
+        }
+
         turn = Maze_update(game->maze, &game->colaTurn);
 
-        _Game_draw(game);
+        _Game_draw(game, 0);
 
         SDL_Delay(16);
     }
@@ -185,10 +222,13 @@ void _Game_update(tGame* game) {
         puts("Ganaste papu esc para salir");
         Mix_HaltMusic();
         SoundManager_playMusic(&game->vecMusic, "musicVictory");
+        SDL_Delay(800);
+        Maze_resetPlayer(game->maze);
         while(game->running) {
             _Game_handleEvents(game, false);
-            _Game_draw(game);
-            SDL_Delay(16);
+            _Game_draw(game, VICTORY);
+            Maze_recreateGame(game->maze, &game->colaMovement);
+            SDL_Delay(216);
         }
     }
 
@@ -197,10 +237,13 @@ void _Game_update(tGame* game) {
         Mix_HaltMusic();
         Mix_VolumeMusic(15);
         SoundManager_playMusic(&game->vecMusic, "musicLost");
+        SDL_Delay(800);
+        Maze_resetPlayer(game->maze);
         while(game->running) {
             _Game_handleEvents(game, false);
-            _Game_draw(game);
-            SDL_Delay(16);
+            _Game_draw(game, LOST);
+            Maze_recreateGame(game->maze, &game->colaMovement);
+            SDL_Delay(216);
         }
     }
  }

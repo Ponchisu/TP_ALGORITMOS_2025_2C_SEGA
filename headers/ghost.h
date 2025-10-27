@@ -11,11 +11,14 @@
 #define LOST_POINTS 150
 
 #define FOLLOW 0
-#define TOP_LEFT 1
-#define TOP_RIGHT 2
-#define BOT_LEFT 3
-#define BOT_RIGHT 4
-#define SEMI_RANDOM 5
+#define SEMI_RANDOM 1
+#define RANDOM 2
+#define CORNER 3
+
+#define TOP_LEFT 4
+#define TOP_RIGHT 5
+#define BOT_LEFT 6
+#define BOT_RIGHT 7
 
 typedef struct 
 {

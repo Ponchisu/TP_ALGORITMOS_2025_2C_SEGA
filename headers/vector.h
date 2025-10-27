@@ -25,6 +25,8 @@ typedef struct {
 typedef int (*Cmp)(const void* elem1, const void* elem2);
 typedef void (*Update)(void* elem1, const void* elem2);
 
+void Vector_init(tVector* pVec);
+
 bool Vector_create(tVector* pVec, unsigned sizeElem, unsigned capacity);
 void Vector_clean(tVector* pVec);
 bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update update);

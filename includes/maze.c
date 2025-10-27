@@ -10,9 +10,11 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
     tGhost ghost;
     tAwards award;
     tLives live;
+    tKeys key;
     int idGhost = 0;
     int idAwards = 0;
     int idLives = 0;
+    int idKey = 0;
 
     *pMaze = (tMaze*)malloc(sizeof(tMaze));
     if(*pMaze == NULL) {
@@ -20,15 +22,28 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
+    Vector_init(&(*pMaze)->vecAwards);
+    Vector_init(&(*pMaze)->vecChunk);
+    Vector_init(&(*pMaze)->vecGhost);
+    Vector_init(&(*pMaze)->vecKeys);
+    Vector_init(&(*pMaze)->vecLives);
+    Vector_init(&(*pMaze)->vecTex);
+
     (*pMaze)->rows = rows;
     (*pMaze)->columns = columns;
     (*pMaze)->renderer = renderer;
     (*pMaze)->points = 0;
+    (*pMaze)->keys = SIZE_VECKEYS;
 
 
     (*pMaze)->maze = (char**)Matrix_create(rows, columns, sizeof(char));
     if((*pMaze)->maze == NULL) {
         fprintf(stderr, "Error al crear matriz de laberinto\n");
+        return false;
+    }
+
+    if(!Matrix_randomCreate(rows, columns, 1, numGhosts, numAwards, SIZE_VECKEYS, maxLives, FILE_NAME)) {
+        fprintf(stderr, "Error al crear laberinto random\n");
         return false;
     }
 
@@ -58,28 +73,38 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
-    if(!Vector_create(&(*pMaze)->vecCunk, sizeof(tChunk), SIZE_VECCHUNK)) {
+    if(!Vector_create(&(*pMaze)->vecChunk, sizeof(tChunk), SIZE_VECCHUNK)) {
         fprintf(stderr, "Error al crear vector de chunk\n");
         return false;
     }
 
-    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/points.wav", "points", 20)) {
+    if(!Vector_create(&(*pMaze)->vecKeys, sizeof(tKeys), SIZE_VECKEYS)) {
+        fprintf(stderr, "Error al crear vector de keys\n");
+        return false;
+    }
+
+    if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/points.wav", "points", 20)) {
         fprintf(stderr, "Error al cargar sonido points\n");
         return false;
     }
 
-    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/hit.wav", "hit", 20)) {
+    if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/hit.wav", "hit", 20)) {
         fprintf(stderr, "Error al cargar sonido hit\n");
         return false;
     }
 
-    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/heart.wav", "heart", 20)) {
+    if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/heart.wav", "heart", 20)) {
         fprintf(stderr, "Error al cargar sonido heart\n");
         return false;
     }
 
-    if(!SoundManager_loadChunk(&(*pMaze)->vecCunk, "sound/turn.wav", "turn", 10)) {
+    if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/turn.wav", "turn", 10)) {
         fprintf(stderr, "Error al cargar sonido turn\n");
+        return false;
+    }
+
+    if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/unluck.wav", "unluck", 15)) {
+        fprintf(stderr, "Error al cargar sonido unluck\n");
         return false;
     }
 
@@ -110,6 +135,11 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
 
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/wall.png", "wall", renderer)) {
         fprintf(stderr, "Error al cargar imagen Pared\n");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/key.png", "key", renderer)) {
+        fprintf(stderr, "Error al cargar imagen Key\n");
         return false;
     }
 
@@ -160,6 +190,14 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
                 }
                 idLives++;
                 (*pMaze)->maze[i][j] = '.';
+            } else if((*pMaze)->maze[i][j] == 'K') {
+                Key_create(&key, i, j, "");
+                Key_numIde(&key, idKey);
+                if(!Vector_insertInOrder(&(*pMaze)->vecKeys, &key, Key_cmp, NULL)) {
+                    return false;
+                }
+                idKey++;
+                (*pMaze)->maze[i][j] = '.';
             } else if ((*pMaze)->maze[i][j] == 'S') {
                 playerCreate(&(*pMaze)->player, i, j, numLives);
             } else if((*pMaze)->maze[i][j] == 'E') {
@@ -167,24 +205,26 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         }
     }
 
-    Matriz_show((*pMaze)->maze, rows, columns);
-
     return true;
 }
 
 void Maze_clean(tMaze** pMaze) {
     Matrix_clean((void**)(*pMaze)->maze, (*pMaze)->rows);
 
-    TextureManager_clean(&(*pMaze)->vecTex);
+    if(Vector_empty(&(*pMaze)->vecTex) == false) {
+        TextureManager_clean(&(*pMaze)->vecTex);
+    }
     Vector_clean(&(*pMaze)->vecTex);
+    
     Vector_clean(&(*pMaze)->vecGhost);
     Vector_clean(&(*pMaze)->vecAwards);
     Vector_clean(&(*pMaze)->vecLives);
 
-    if(Vector_empty(&(*pMaze)->vecCunk) == false) {
-        SoundManager_cleanChunk(&(*pMaze)->vecCunk);
+    if(Vector_empty(&(*pMaze)->vecChunk) == false) {
+        SoundManager_cleanChunk(&(*pMaze)->vecChunk);
     }
-    Vector_clean(&(*pMaze)->vecCunk);
+    Vector_clean(&(*pMaze)->vecChunk);
+
     Margin_clean(&(*pMaze)->margin);
 
     free(*pMaze);
@@ -206,8 +246,14 @@ void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, cons
     free(elem);
 }
 
-void Maze_draw(tMaze* pMaze) {
-    Margin_draw(&pMaze->margin, pMaze->renderer);
+void Maze_draw(tMaze* pMaze, int marginDraw) {
+    if(marginDraw == VICTORY) {
+        Margin_drawWin(&pMaze->margin, pMaze->renderer);
+    } else if(marginDraw == LOST){
+        Margin_drawLost(&pMaze->margin, pMaze->renderer);
+    } else {
+        Margin_draw(&pMaze->margin, pMaze->renderer);
+    }
     for (int rows = 0; rows < pMaze->rows; rows++) {
         for (int col = 0; col < pMaze->columns; col++) {
             if (pMaze->maze[rows][col] == '#') {
@@ -230,9 +276,12 @@ void Maze_draw(tMaze* pMaze) {
         }
         TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
 
-        _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
-        _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->renderer, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
-        _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->renderer, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
+        if(marginDraw != VICTORY && marginDraw != LOST) {
+            _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+            _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->renderer, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
+            _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->renderer, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
+            _Maze_drawElem(&pMaze->vecKeys, &pMaze->vecTex, pMaze->renderer, "key", sizeof(tKeys), Key_isAlive, Key_getY, Key_getX);
+        }
     }
 }
 
@@ -310,7 +359,7 @@ bool _Maze_ghostMovementIsIntersection(tMaze* pMaze, int posX, int posY, int dir
     int count = 0;
 
     if (pMaze->maze[posY - 1][posX] == '.')
-        count++; 
+        count++;
     if (pMaze->maze[posY + 1][posX] == '.')
         count++;
     if (pMaze->maze[posY][posX - 1] == '.')
@@ -318,11 +367,11 @@ bool _Maze_ghostMovementIsIntersection(tMaze* pMaze, int posX, int posY, int dir
     if (pMaze->maze[posY][posX + 1] == '.')
         count++;
 
-    if (dirX > 0 && pMaze->maze[posY][posX - 1] == '.') 
+    if (dirX > 0 && pMaze->maze[posY][posX - 1] == '.')
         count--;
     else if (dirX < 0 && pMaze->maze[posY][posX + 1] == '.')
         count--;
-    else if (dirY > 0 && pMaze->maze[posY - 1][posX] == '.') 
+    else if (dirY > 0 && pMaze->maze[posY - 1][posX] == '.')
         count--;
     else if (dirY < 0 && pMaze->maze[posY + 1][posX] == '.')
         count--;
@@ -376,7 +425,7 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
 
     playerX = Player_getX(&pMaze->player);
     playerY = Player_getY(&pMaze->player);
-    
+
     VectorIterator_create(&vecIter, &pMaze->vecGhost);
     VectorIterator_first(&vecIter, &ghost);
     while(!VectorIterator_finished(&vecIter)) {
@@ -388,44 +437,47 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
             tipeMove = Ghost_getTipeMove(&ghost);
 
             move.vecX = dirGhostX;
-            move.vecY = dirGhostY; 
+            move.vecY = dirGhostY;
 
             if(_Maze_ghostMovementIsIntersection(pMaze, ghostX, ghostY, dirGhostX, dirGhostY) == true) {
                 switch(tipeMove) {
                     case FOLLOW:
                         _Maze_ghostFollowPos(pMaze, playerX, playerY, ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
+                    break;
+                    case SEMI_RANDOM:
+                    _Maze_ghostFollowPos(pMaze, playerY, playerX, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                    break;
+                    case RANDOM:
+                    _Maze_ghostFollowPos(pMaze, rand() %(pMaze->columns - 2) + 1, rand() % (pMaze->rows - 2) + 1, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                    break;
                     case TOP_LEFT:
                         _Maze_ghostFollowPos(pMaze, 0, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                         break;
                     case TOP_RIGHT:
-                        _Maze_ghostFollowPos(pMaze, Maze_getColumns(pMaze), 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                        _Maze_ghostFollowPos(pMaze, pMaze->columns, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                         break;
                     case BOT_LEFT:
-                        _Maze_ghostFollowPos(pMaze, 0, Maze_getRows(pMaze), ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                        _Maze_ghostFollowPos(pMaze, 0, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                         break;
                     case BOT_RIGHT:
-                        _Maze_ghostFollowPos(pMaze, Maze_getColumns(pMaze), Maze_getRows(pMaze), ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
-                    case SEMI_RANDOM:
-                        _Maze_ghostFollowPos(pMaze, playerY, playerX, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                        _Maze_ghostFollowPos(pMaze, pMaze->columns, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                         break;
                 }
             } else if(!_Maze_ghostMovementIsValid(pMaze, ghostX + dirGhostX, ghostY + dirGhostY)) {
                 if (dirGhostX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY)) {
-                    move.vecX = -1; 
+                    move.vecX = -1;
                     move.vecY = 0;
                 }
                 else if (dirGhostX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY)) {
-                    move.vecX = 1; 
+                    move.vecX = 1;
                     move.vecY = 0;
                 }
                 else if (dirGhostY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1)) {
-                    move.vecX = 0; 
+                    move.vecX = 0;
                     move.vecY = 1;
                 }
                 else if (dirGhostY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1)) {
-                    move.vecX = 0; 
+                    move.vecX = 0;
                     move.vecY = -1;
                 } else {
                     _Maze_ghostMovementInvertDir(&dirGhostX, &dirGhostY);
@@ -450,7 +502,7 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
     }
 
     if(strcmp(move.id, "player") == 0) {
-        SoundManager_playChunk(&pMaze->vecCunk, "turn");
+        SoundManager_playChunk(&pMaze->vecChunk, "turn");
         Player_movement(&pMaze->player, move);
         return true;
     }
@@ -474,6 +526,7 @@ int Maze_check(tMaze* pMaze) {
     tGhost ghost;
     tLives live;
     tAwards award;
+    tKeys key;
     tVectorIterator vecIter;
     int _return = OK;
 
@@ -487,6 +540,29 @@ int Maze_check(tMaze* pMaze) {
         return VICTORY;
     }
 
+    VectorIterator_create(&vecIter, &pMaze->vecKeys);
+    VectorIterator_first(&vecIter, &key);
+    while(!VectorIterator_finished(&vecIter)) {
+        if(Key_isAlive(&key) == true) {
+            elemX = Key_getX(&key);
+            elemY = Key_getY(&key);
+
+            if(elemX == playerX && elemY == playerY) {
+                SDL_Delay(100);
+                Key_delete(&key);
+                Vector_Update(&pMaze->vecKeys, &key, Key_cmp, Key_update);
+                pMaze->keys --;
+                if(pMaze->keys == 0) {
+                    SoundManager_playChunk(&pMaze->vecChunk, "unluck");
+                    pMaze->maze[pMaze->rows -1][rand() % (pMaze->columns - 2) + 1] = 'E';
+                } else {
+                    SoundManager_playChunk(&pMaze->vecChunk, "points");
+                }
+            }
+        }
+        VectorIterator_next(&vecIter, &key);
+    }
+
     VectorIterator_create(&vecIter, &pMaze->vecLives);
     VectorIterator_first(&vecIter, &live);
     while(!VectorIterator_finished(&vecIter) && _return == OK) {
@@ -496,7 +572,7 @@ int Maze_check(tMaze* pMaze) {
 
             if(elemX == playerX && elemY == playerY) {
                 _return = ADD_LIVE;
-                SoundManager_playChunk(&pMaze->vecCunk, "heart");
+                SoundManager_playChunk(&pMaze->vecChunk, "heart");
                 SDL_Delay(100);
                 Player_addLives(&pMaze->player);
                 Lives_delete(&live);
@@ -519,7 +595,7 @@ int Maze_check(tMaze* pMaze) {
             if(elemX == playerX && elemY == playerY) {
                 _return = GET_AWARD;
                 SDL_Delay(100);
-                SoundManager_playChunk(&pMaze->vecCunk, "points");
+                SoundManager_playChunk(&pMaze->vecChunk, "points");
                 Awards_delete(&award);
                 Vector_Update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
                 pMaze->points += GET_POINTS;
@@ -548,7 +624,7 @@ int Maze_check(tMaze* pMaze) {
 
     if(_return == LOST_LIVE) {
         SDL_Delay(200);
-        SoundManager_playChunk(&pMaze->vecCunk, "hit");
+        SoundManager_playChunk(&pMaze->vecChunk, "hit");
         if(pMaze->points >= 150) {
             pMaze->points -= 150;
             Margin_updatePoints(&pMaze->margin, pMaze->points);
@@ -560,8 +636,12 @@ int Maze_check(tMaze* pMaze) {
             Player_resetPos(&pMaze->player);
             lives--;
             Margin_updateLives(&pMaze->margin, lives);
-        } else
+        } else {
             _return = LOST;
+            pMaze->points = 0;
+            Margin_updatePoints(&pMaze->margin, pMaze->points);
+        }
+
     }
 
     return _return;
@@ -588,4 +668,45 @@ int Maze_getColumns(tMaze* pMaze) {
 
 int Maze_getRows(tMaze* pMaze) {
     return pMaze->rows;
+}
+
+void Maze_resetPlayer(tMaze* pMaze) {
+    Player_resetPos(&pMaze->player);
+}
+
+void Maze_recreateGame(tMaze* pMaze, tCola* pColaMovement) {
+    char charMove;
+    tMovement move;
+
+    if(!Cola_takeOut(pColaMovement, &charMove, sizeof(char))) {
+        return;
+    }
+
+    move.vecX = 0;
+    move.vecY = 0;
+
+    if(charMove == 'R') {
+        move.vecX = 1;
+        move.vecY = 0;
+        SoundManager_playChunk(&pMaze->vecChunk, "turn");
+    } else if(charMove == 'L') {
+        move.vecX = -1;
+        move.vecY = 0;
+        SoundManager_playChunk(&pMaze->vecChunk, "turn");
+    } else if(charMove == 'D') {
+        move.vecX = 0;
+        move.vecY = 1;
+        SoundManager_playChunk(&pMaze->vecChunk, "turn");
+    } else if(charMove == 'U') {
+        move.vecX = 0;
+        move.vecY = -1;
+        SoundManager_playChunk(&pMaze->vecChunk, "turn");
+    } else if(charMove == 'X') {
+        move.vecX = 0;
+        move.vecY = 0;
+        Player_resetPos(&pMaze->player);
+        SoundManager_playChunk(&pMaze->vecChunk, "hit");
+    }
+
+    Player_movement(&pMaze->player, move);
 }

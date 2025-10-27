@@ -1,19 +1,28 @@
 #include "../headers/ghost.h"
 
 void Ghost_create(tGhost* pGhost, int y, int x, const char* id, int number) {
+    int vecX[4] = {0, 0, 1, -1};
+    int vecY[4] = {1, -1, 0, 0};
+    int r;
    strcpy(pGhost->id, id);
    pGhost->x = x;
    pGhost->y = y;
    pGhost->isAlive = true;
-   pGhost->vecX = 0;
-   pGhost->vecY = 0;
+   
+   r = rand() % 4;
+   pGhost->vecX = vecX[r];
+   pGhost->vecY = vecY[r];
    
    if(number == 0) {
-    pGhost->tipeMove = FOLLOW;
+        pGhost->tipeMove = FOLLOW;
    } else {
-    pGhost->tipeMove = (rand() % 5);
+        r = (rand() % 4);
+        if(r == 3) {
+            pGhost->tipeMove = (rand() % 4 + 4);
+        } else {
+            pGhost->tipeMove = r;
+        }
    }
-   printf("%s %d\n", id, pGhost->tipeMove);
 }
 
 void Ghost_getId(const tGhost* pGhost, char* string) {

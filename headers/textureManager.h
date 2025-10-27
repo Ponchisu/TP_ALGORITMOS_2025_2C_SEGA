@@ -11,6 +11,8 @@
 #define SIZE_ID 20
 #define WIDTH 32
 #define WIDTH_NUMBERS 16
+#define WIDTH_VICTORY 98
+#define WIDTH_LOST 116
 #define HEIGTH 32
 
 typedef struct{

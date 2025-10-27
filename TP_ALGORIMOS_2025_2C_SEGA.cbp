@@ -50,6 +50,7 @@
 		<Unit filename="headers/config.h" />
 		<Unit filename="headers/game.h" />
 		<Unit filename="headers/ghost.h" />
+		<Unit filename="headers/key.h" />
 		<Unit filename="headers/lives.h" />
 		<Unit filename="headers/margin.h" />
 		<Unit filename="headers/matrix.h" />
@@ -74,6 +75,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/ghost.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/key.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/lives.c">

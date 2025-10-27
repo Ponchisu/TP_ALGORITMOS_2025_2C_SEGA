@@ -65,14 +65,122 @@ bool Matrix_loadFromFileTxt(void** mat, int rows, int columns, char* fileName, A
     return true;
 }
 
-void Matriz_show(char** mat, int rows, int columns) {
+bool Matrix_randomCreate(int rows, int columns, int density, int numGhosts, int numAwards, int numKeys, int numHeart, const char* fileName) {
+    int x, y, wallDensity, r, my[4], mx[4], midX, midY;
+    char** maze = (char**)Matrix_create(rows, columns, sizeof(char));
+    if(maze == NULL) {
+        return false;
+    }
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            if (i == 0 || j == 0 || i == rows - 1 || j == columns - 1) {
+                maze[i][j] = '#';
+            } else {
+                maze[i][j] = '.';
+            }
+        }
+    }
+
+    wallDensity = density * 8;
+    density = rows * columns * density / 4;
+
+    for (int i = 0; i < density; i++) {
+        x = rand() % (columns - 4) + 2;
+        x = (x / 2) * 2;
+        y = rand() % (rows - 4) + 2;
+        y = (y / 2) * 2;
+
+        maze[y][x] = '#';
+
+        for (int j = 0; j < wallDensity; j++) {
+            mx[0] = x;
+            my[0] = y + 2;
+            mx[1] = x;
+            my[1] = y - 2;
+            mx[2] = x + 2;
+            my[2] = y;
+            mx[3] = x - 2;
+            my[3] = y;
+
+            r = rand() % 4;
+
+            if (my[r] > 0 && my[r] < rows - 1 && mx[r] > 0 && mx[r] < columns - 1) {
+                if (maze[my[r]][mx[r]] == '.') {
+                    maze[my[r]][mx[r]] = '#';
+
+                    midY = my[r] + (y - my[r]) / 2;
+                    midX = mx[r] + (x - mx[r]) / 2;
+                    maze[midY][midX] = '#';
+                }
+            }
+        }
+    }
+
+    r = rand() % (columns - 2) + 1;
+    maze[0][r] = 'S';
+
+    while(numGhosts != 0) {
+        x = rand() % (columns - 4) + 2;
+        y = rand() % (rows - 4) + 2;
+        if(maze[y][x] == '.') {
+            maze[y][x] = 'G';
+            numGhosts--;
+        }
+    }
+
+    while(numKeys != 0) {
+        x = rand() % (columns - 4) + 2;
+        y = rand() % (rows - 4) + 2;
+        if(maze[y][x] == '.') {
+            maze[y][x] = 'K';
+            numKeys--;
+        }
+    }
+
+    while(numHeart != 0) {
+        x = rand() % (columns - 2) + 1;
+        y = rand() % (rows - 2) + 1;
+        if(maze[y][x] == '.') {
+            maze[y][x] = 'H';
+            numHeart--;
+        }
+    }
+
+    while(numAwards != 0) {
+        x = rand() % (columns - 4) + 2;
+        y = rand() % (rows - 4) + 2;
+        if(maze[y][x] == '.') {
+            maze[y][x] = 'A';
+            numAwards--;
+        }
+    }
+
+    if(Matrix_uploadFileTxt((void**)maze, (char*)fileName, rows, columns, MatrixUploadFileTxt_uploadChar) == false) {
+        Matrix_clean((void**)maze, rows);
+        return false;
+    }
+
+    Matrix_clean((void**)maze, rows);
+    return true;
+}
+
+bool Matrix_uploadFileTxt(void** mat, const char* fileName, int rows, int columns, UploadFileTxt uploadFileTxt) {
+    FILE* pFile;
+
+    pFile = fopen(fileName, "wt");
+    if(pFile == NULL) {
+        return false;
+    }
+
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < columns; j++) {
-            printf("%c", mat[i][j]);
+            uploadFileTxt(mat, pFile, i, j);
         }
-
-        putchar('\n');
+        fprintf(pFile, "\n");
     }
+
+    fclose(pFile);
+    return true;
 }
 
 void MatrixAction_loadChar(void** mat, const void* elem, int rows, int columns) {
@@ -80,3 +188,10 @@ void MatrixAction_loadChar(void** mat, const void* elem, int rows, int columns) 
     const char* elemChar = elem;
     matChar[rows][columns] = *elemChar;
 }
+
+void MatrixUploadFileTxt_uploadChar(void** mat, FILE* pFile, int rows, int columns) {
+    char** matChar = (char**)mat;
+    fprintf(pFile, "%c", matChar[rows][columns]);
+}
+
+

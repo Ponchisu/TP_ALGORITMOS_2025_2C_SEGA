@@ -2,6 +2,13 @@
 
 bool _Vector_resize(tVector* pVec, unsigned newCapacity);
 
+void Vector_init(tVector* pVec) {
+    pVec->vec = NULL;
+    pVec->capacity = 0;
+    pVec->lotElem = 0;
+    pVec->sizeElem = 0;
+}
+
 bool Vector_create(tVector* pVec, unsigned sizeElem, unsigned capacity) {
     pVec->vec = malloc(sizeElem * capacity);
 
