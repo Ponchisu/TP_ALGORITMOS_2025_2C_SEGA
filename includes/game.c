@@ -24,6 +24,7 @@ bool Game_init(tGame* game) {
     game->colaMovement = NULL;
     game->colaTurn = NULL;
     game->pMenu = NULL;
+    strcpy(game->name, "");
 
     Vector_init(&game->vecMusic);
 

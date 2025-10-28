@@ -9,14 +9,19 @@ void _Menu_insertName(tMenu* pMenu, char* name);
 void _Menu_handleinsertName(tMenu* pMenu, char* pName);
 void _Menu_insertNameDraw(tMenu* pMenu, char* pName);
 
+int _Button_cmp(const void* elem1, const void* elem2);
+void _Button_update(void* elem1, const void* elem2);
+
 bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
     SDL_Color nameColor = {255, 255, 255, 255};
-    SDL_Surface* surface;
     *pMenu = (tMenu*)malloc(sizeof(tMenu));
     if(*pMenu == NULL) {
         fprintf(stderr, "Error al crear menu\n");
         return false;
     }
+
+    Vector_init(&(*pMenu)->vecTex);
+    Vector_init(&(*pMenu)->vecButton);
 
     (*pMenu)->music = Mix_LoadMUS("sound/musicMenu.mp3");
     if((*pMenu)->music == NULL) {
@@ -90,8 +95,13 @@ bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
         fprintf(stderr, "Error al cargar imagen manuName\n");
         return false;
     }
-
+    
     (*pMenu)->font = TTF_OpenFont("assets/Monocraft.ttf", 24);
+
+    if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Insertar nombre:", "insrtName", (*pMenu)->font, nameColor, renderer)) {
+        fprintf(stderr, "Error al cargar Insertar nombre:\n");
+        return false;
+    }
 
     (*pMenu)->window = window;
     (*pMenu)->renderer = renderer;
@@ -101,46 +111,41 @@ bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer) {
     (*pMenu)->playGame = false;
     (*pMenu)->showRanking = false;
 
-    (*pMenu)->buttonPlayH = false;
-    (*pMenu)->buttonPlay.x = 156;
-    (*pMenu)->buttonPlay.y = 260;
-    (*pMenu)->buttonPlay.w = 249;
-    (*pMenu)->buttonPlay.h = 89;
+    if(!Vector_create(&(*pMenu)->vecButton, sizeof(tButton), SIZE_VECBUTTON)) {
+        fprintf(stderr, "Error al crear vectorButton\n");
+        return false;
+    }
 
-    (*pMenu)->buttonRankingH = false;
-    (*pMenu)->buttonRanking.x = 156;
-    (*pMenu)->buttonRanking.y = 359;
-    (*pMenu)->buttonRanking.w = 249;
-    (*pMenu)->buttonRanking.h = 89;
+    if(!Button_load(&(*pMenu)->vecButton, "play", 156, 260, 249, 89)) {
+        fprintf(stderr, "Error al cargar button play\n");
+        return false;
+    }
 
-    (*pMenu)->buttonQuitH = false;
-    (*pMenu)->buttonQuit.x = 156;
-    (*pMenu)->buttonQuit.y = 458;
-    (*pMenu)->buttonQuit.w = 249;
-    (*pMenu)->buttonQuit.h = 89;
+    if(!Button_load(&(*pMenu)->vecButton, "ranking", 156, 359, 249, 89)) {
+        fprintf(stderr, "Error al cargar button Ranking\n");
+        return false;
+    }
 
-    (*pMenu)->buttonExitH = false;
-    (*pMenu)->buttonExit.x = 8;
-    (*pMenu)->buttonExit.y = 10;
-    (*pMenu)->buttonExit.w = 93;
-    (*pMenu)->buttonExit.h = 59;
+    if(!Button_load(&(*pMenu)->vecButton, "quit", 156, 458, 249, 89)) {
+        fprintf(stderr, "Error al cargar button Quit\n");
+        return false;
+    }
 
-    surface = TTF_RenderText_Solid((*pMenu)->font, "Insertar nombre:", nameColor);
+    if(!Button_load(&(*pMenu)->vecButton, "exit", 8, 10, 93, 59)) {
+        fprintf(stderr, "Error al cargar button Exit\n");
+        return false;
+    }
 
-    (*pMenu)->insName = SDL_CreateTextureFromSurface(renderer, surface);
-    
-    (*pMenu)->rectInsName.x = 88;
-    (*pMenu)->rectInsName.y = 210;
-    (*pMenu)->rectInsName.w = surface->w;
-    (*pMenu)->rectInsName.h = surface->h;
-    
-    SDL_FreeSurface(surface);
     return true;
 }
 
 void Menu_clean(tMenu** pMenu) {
-    TextureManager_clean(&(*pMenu)->vecTex);
+    if(Vector_empty(&(*pMenu)->vecTex) == false) {
+        TextureManager_clean(&(*pMenu)->vecTex);
+    }
     Vector_clean(&(*pMenu)->vecTex);
+
+    Vector_clean(&(*pMenu)->vecButton);
 
     if((*pMenu)->music != NULL) {
         Mix_FreeMusic((*pMenu)->music);
@@ -172,7 +177,13 @@ bool Menu_running(tMenu* pMenu, char* pName) {
 
 void _Menu_handleEvents(tMenu* pMenu) {
     int x,y;
-        while(SDL_PollEvent(&pMenu->event)) {
+    tButton bPlay, bRanking, bQuit;
+
+    Button_search(&pMenu->vecButton, "play", &bPlay);
+    Button_search(&pMenu->vecButton, "ranking", &bRanking);
+    Button_search(&pMenu->vecButton, "quit", &bQuit);
+
+    while(SDL_PollEvent(&pMenu->event)) {
         switch (pMenu->event.type) {
         case SDL_QUIT:
             puts("Enter para salir");
@@ -190,50 +201,46 @@ void _Menu_handleEvents(tMenu* pMenu) {
         case SDL_MOUSEMOTION:
             x = pMenu->event.motion.x;
             y = pMenu->event.motion.y;
-            if (x >= pMenu->buttonPlay.x && x <= pMenu->buttonPlay.x + pMenu->buttonPlay.w && y >= pMenu->buttonPlay.y && y <= pMenu->buttonPlay.y + pMenu->buttonPlay.h) {
-                pMenu->buttonPlayH = true;
+
+            if (x >= Button_getX(&bPlay) && x <= Button_getX(&bPlay) + Button_getW(&bPlay) && y >= Button_getY(&bPlay) && y <= Button_getY(&bPlay) + Button_getH(&bPlay)) {
+                Button_trueHover(&bPlay);
+                Vector_Update(&pMenu->vecButton, &bPlay, _Button_cmp, _Button_update);
             } else {
-                pMenu->buttonPlayH = false;
+                Button_falseHover(&bPlay);
+                Vector_Update(&pMenu->vecButton, &bPlay, _Button_cmp, _Button_update);
             }
-            x = pMenu->event.motion.x;
-            y = pMenu->event.motion.y;
-            if (x >= pMenu->buttonRanking.x && x <= pMenu->buttonRanking.x + pMenu->buttonRanking.w && y >= pMenu->buttonRanking.y && y <= pMenu->buttonRanking.y + pMenu->buttonRanking.h) {
-                pMenu->buttonRankingH = true;
+
+            if (x >= Button_getX(&bRanking) && x <= Button_getX(&bRanking) + Button_getW(&bRanking) && y >= Button_getY(&bRanking) && y <= Button_getY(&bRanking) + Button_getH(&bRanking)) {
+                Button_trueHover(&bRanking);
+                Vector_Update(&pMenu->vecButton, &bRanking, _Button_cmp, _Button_update);
             } else {
-                pMenu->buttonRankingH = false;
+                Button_falseHover(&bRanking);
+                Vector_Update(&pMenu->vecButton, &bRanking, _Button_cmp, _Button_update);
             }
-            x = pMenu->event.motion.x;
-            y = pMenu->event.motion.y;
-            if (x >= pMenu->buttonQuit.x && x <= pMenu->buttonQuit.x + pMenu->buttonQuit.w && y >= pMenu->buttonQuit.y && y <= pMenu->buttonQuit.y + pMenu->buttonQuit.h) {
-                pMenu->buttonQuitH = true;
+
+            if (x >= Button_getX(&bQuit) && x <= Button_getX(&bQuit) + Button_getW(&bQuit) && y >= Button_getY(&bQuit) && y <= Button_getY(&bQuit) + Button_getH(&bQuit)) {
+                Button_trueHover(&bQuit);
+                Vector_Update(&pMenu->vecButton, &bQuit, _Button_cmp, _Button_update);
             } else {
-                pMenu->buttonQuitH = false;
+                Button_falseHover(&bQuit);
+                Vector_Update(&pMenu->vecButton, &bQuit, _Button_cmp, _Button_update);
             }
             break;
             case SDL_MOUSEBUTTONDOWN:
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
-                    x = pMenu->event.button.x;
-                    y = pMenu->event.button.y;
-
-                    if (x >= pMenu->buttonPlay.x && x <= pMenu->buttonPlay.x + pMenu->buttonPlay.w && y >= pMenu->buttonPlay.y && y <= pMenu->buttonPlay.y + pMenu->buttonPlay.h) {
+                    if (x >= Button_getX(&bPlay) && x <= Button_getX(&bPlay) + Button_getW(&bPlay) && y >= Button_getY(&bPlay) && y <= Button_getY(&bPlay) + Button_getH(&bPlay)) {
                         pMenu->playGame = true;
                         Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
-                    x = pMenu->event.button.x;
-                    y = pMenu->event.button.y;
-
-                    if (x >= pMenu->buttonRanking.x && x <= pMenu->buttonRanking.x + pMenu->buttonRanking.w && y >= pMenu->buttonRanking.y && y <= pMenu->buttonRanking.y + pMenu->buttonRanking.h) {
+                    if (x >= Button_getX(&bRanking) && x <= Button_getX(&bRanking) + Button_getW(&bRanking) && y >= Button_getY(&bRanking) && y <= Button_getY(&bRanking) + Button_getH(&bRanking)) {
                         pMenu->showRanking = true;
                         Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
-                    x = pMenu->event.button.x;
-                    y = pMenu->event.button.y;
-
-                    if (x >= pMenu->buttonQuit.x && x <= pMenu->buttonQuit.x + pMenu->buttonQuit.w && y >= pMenu->buttonQuit.y && y <= pMenu->buttonQuit.y + pMenu->buttonQuit.h) {
+                    if (x >= Button_getX(&bQuit) && x <= Button_getX(&bQuit) + Button_getW(&bQuit) && y >= Button_getY(&bQuit) && y <= Button_getY(&bQuit) + Button_getH(&bQuit)) {
                         Mix_PlayChannel(-1, pMenu->click, 0);
                         pMenu->running = false;
                     }
@@ -245,22 +252,41 @@ void _Menu_handleEvents(tMenu* pMenu) {
 
   void _Menu_draw(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
+    tButton button;
+    int x, y, w, h;
 
-    TextureManager_Draw(&pMenu->vecTex, "menu", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
-    if(pMenu->buttonPlayH == true) {
-        TextureManager_Draw(&pMenu->vecTex, "bPlayH", pMenu->buttonPlay.y, pMenu->buttonPlay.x, pMenu->buttonPlay.w, pMenu->buttonPlay.h, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "menu", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
+    Button_search(&pMenu->vecButton, "play", &button);
+    x = Button_getX(&button);
+    y = Button_getY(&button);
+    w = Button_getW(&button);
+    h = Button_getH(&button);
+    if(Button_isHover(&button) == true) {
+        TextureManager_draw(&pMenu->vecTex, "bPlayH", y, x, w, h, pMenu->renderer);
     }else {
-        TextureManager_Draw(&pMenu->vecTex, "bPlay", pMenu->buttonPlay.y, pMenu->buttonPlay.x, pMenu->buttonPlay.w, pMenu->buttonPlay.h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bPlay", y, x, w, h, pMenu->renderer);
     }
-    if(pMenu->buttonRankingH == true) {
-        TextureManager_Draw(&pMenu->vecTex, "bRankH", pMenu->buttonRanking.y, pMenu->buttonRanking.x, pMenu->buttonRanking.w, pMenu->buttonRanking.h, pMenu->renderer);
+
+    Button_search(&pMenu->vecButton, "ranking", &button);
+    x = Button_getX(&button);
+    y = Button_getY(&button);
+    w = Button_getW(&button);
+    h = Button_getH(&button);
+    if(Button_isHover(&button) == true) {
+        TextureManager_draw(&pMenu->vecTex, "bRankH", y, x, w, h, pMenu->renderer);
     }else {
-        TextureManager_Draw(&pMenu->vecTex, "bRank", pMenu->buttonRanking.y, pMenu->buttonRanking.x, pMenu->buttonRanking.w, pMenu->buttonRanking.h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bRank", y, x, w, h, pMenu->renderer);
     }
-    if(pMenu->buttonQuitH == true) {
-        TextureManager_Draw(&pMenu->vecTex, "bQuitH", pMenu->buttonQuit.y, pMenu->buttonQuit.x, pMenu->buttonQuit.w, pMenu->buttonQuit.h, pMenu->renderer);
+
+    Button_search(&pMenu->vecButton, "quit", &button);
+    x = Button_getX(&button);
+    y = Button_getY(&button);
+    w = Button_getW(&button);
+    h = Button_getH(&button);
+    if(Button_isHover(&button) == true) {
+        TextureManager_draw(&pMenu->vecTex, "bQuitH", y, x, w, h, pMenu->renderer);
     }else {
-        TextureManager_Draw(&pMenu->vecTex, "bQuit", pMenu->buttonQuit.y, pMenu->buttonQuit.x, pMenu->buttonQuit.w, pMenu->buttonQuit.h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bQuit", y, x, w, h, pMenu->renderer);
     }
 
     SDL_RenderPresent(pMenu->renderer);
@@ -278,7 +304,9 @@ void _Menu_rankingShow(tMenu* pMenu) {
 
 void  _Menu_handleEventsRank(tMenu* pMenu) {
     int x,y;
-        while(SDL_PollEvent(&pMenu->event)) {
+    tButton bExit;
+    Button_search(&pMenu->vecButton, "exit", &bExit);
+    while(SDL_PollEvent(&pMenu->event)) {
         switch (pMenu->event.type) {
         case SDL_QUIT:
             puts("Enter para salir");
@@ -298,10 +326,12 @@ void  _Menu_handleEventsRank(tMenu* pMenu) {
         case SDL_MOUSEMOTION:
             x = pMenu->event.motion.x;
             y = pMenu->event.motion.y;
-            if (x >= pMenu->buttonExit.x && x <= pMenu->buttonExit.x + pMenu->buttonExit.w && y >= pMenu->buttonExit.y && y <= pMenu->buttonExit.y + pMenu->buttonExit.h) {
-                pMenu->buttonExitH = true;
+            if (x >= Button_getX(&bExit) && x <= Button_getX(&bExit) + Button_getW(&bExit) && y >= Button_getY(&bExit) && y <= Button_getY(&bExit) + Button_getH(&bExit)) {
+                Button_trueHover(&bExit);
+                Vector_Update(&pMenu->vecButton, &bExit, _Button_cmp, _Button_update);
             } else {
-                pMenu->buttonExitH = false;
+                Button_falseHover(&bExit);
+                Vector_Update(&pMenu->vecButton, &bExit, _Button_cmp, _Button_update);
             }
             break;
             case SDL_MOUSEBUTTONDOWN:
@@ -309,7 +339,7 @@ void  _Menu_handleEventsRank(tMenu* pMenu) {
                     x = pMenu->event.button.x;
                     y = pMenu->event.button.y;
 
-                    if (x >= pMenu->buttonExit.x && x <= pMenu->buttonExit.x + pMenu->buttonExit.w && y >= pMenu->buttonExit.y && y <= pMenu->buttonExit.y + pMenu->buttonExit.h) {
+                    if (x >= Button_getX(&bExit) && x <= Button_getX(&bExit) + Button_getW(&bExit) && y >= Button_getY(&bExit) && y <= Button_getY(&bExit) + Button_getH(&bExit)) {
                         pMenu->showRanking = false;
                         Mix_PlayChannel(-1, pMenu->click, 0);
                     }
@@ -321,31 +351,30 @@ void  _Menu_handleEventsRank(tMenu* pMenu) {
 
 void _Menu_drawRank(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
+    tButton button;
 
-    TextureManager_Draw(&pMenu->vecTex, "rank", 0, 0, 600, 800, pMenu->renderer);
-    if(pMenu->buttonExitH == true) {
-        TextureManager_Draw(&pMenu->vecTex, "bExitH", pMenu->buttonExit.y, pMenu->buttonExit.x, pMenu->buttonExit.w, pMenu->buttonExit.h, pMenu->renderer);
+    Button_search(&pMenu->vecButton, "exit", &button);
+
+    TextureManager_draw(&pMenu->vecTex, "rank", 0, 0, 600, 800, pMenu->renderer);
+    if(Button_isHover(&button) == true) {
+        TextureManager_draw(&pMenu->vecTex, "bExitH", Button_getY(&button), Button_getX(&button), Button_getW(&button), Button_getH(&button), pMenu->renderer);
     }else {
-        TextureManager_Draw(&pMenu->vecTex, "bExit", pMenu->buttonExit.y, pMenu->buttonExit.x, pMenu->buttonExit.w, pMenu->buttonExit.h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bExit", Button_getY(&button), Button_getX(&button), Button_getW(&button), Button_getH(&button), pMenu->renderer);
     }
 
     SDL_RenderPresent(pMenu->renderer);
  }
 
  void _Menu_insertName(tMenu* pMenu, char* pName) {
-    char name[SIZE_NAME] = " ";
-    char* spaceBar = name;
     SDL_StartTextInput();
     while (pMenu->runningName == true && pMenu->running == true) {
-        _Menu_handleinsertName(pMenu, name);
+        _Menu_handleinsertName(pMenu, pName);
 
-        _Menu_insertNameDraw(pMenu, name);
+        _Menu_insertNameDraw(pMenu, pName);
 
         SDL_Delay(16);
     }
     SDL_StopTextInput();
-    spaceBar++;
-    strcpy(pName, spaceBar);
  }
 
  void _Menu_handleinsertName(tMenu* pMenu, char* pName) {
@@ -356,7 +385,8 @@ void _Menu_drawRank(tMenu* pMenu) {
             pMenu->running = false;
             break;
         case SDL_TEXTINPUT:
-                if (strlen(pName) + strlen(pMenu->event.text.text) < SIZE_NAME) {
+                char c = pMenu->event.text.text[0];
+                if (strlen(pName) + strlen(pMenu->event.text.text) < SIZE_NAME && (ISNUMBER(c) || ISLETTER(c))) {
                     strcat(pName, pMenu->event.text.text);
                 }
             break;
@@ -367,10 +397,12 @@ void _Menu_drawRank(tMenu* pMenu) {
                 pMenu->running = false;
                 break;
             case SDL_SCANCODE_RETURN:
-                pMenu->runningName = false;
+                if(strlen(pName) > 0) {
+                    pMenu->runningName = false;
+                }
                 break;
             case SDL_SCANCODE_BACKSPACE:
-                if(strlen(pName) > 1) {
+                if(strlen(pName) > 0) {
                     pName[strlen(pName) - 1] = '\0';
                 }
                 break;
@@ -384,17 +416,81 @@ void _Menu_drawRank(tMenu* pMenu) {
 void _Menu_insertNameDraw(tMenu* pMenu, char* pName) {
     SDL_RenderClear(pMenu->renderer);
 
-    TextureManager_Draw(&pMenu->vecTex, "mName", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
-    SDL_RenderCopy(pMenu->renderer, pMenu->insName, NULL, &pMenu->rectInsName);
+    TextureManager_draw(&pMenu->vecTex, "mName", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "insrtName", Y_INSRTNAME, X_INSRTNAME, WIDTH_INSRTNAME, HEIGTH_INSRTNAME, pMenu->renderer);
 
-    SDL_Color color = {255, 255, 255, 255};
+    if(strlen(pName) > 0) {
+        SDL_Color color = {255, 255, 255, 255};
 
-    SDL_Surface* surface = TTF_RenderText_Solid(pMenu->font, pName, color);
-    SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(pMenu->renderer, surface);
-    SDL_Rect nameRect = {200, 329, surface->w, surface->h};
-    SDL_RenderCopy(pMenu->renderer, nameTexture, NULL, &nameRect);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(nameTexture);
+        SDL_Surface* surface = TTF_RenderText_Solid(pMenu->font, pName, color);
+        SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(pMenu->renderer, surface);
+        SDL_Rect nameRect = {209, 329, surface->w, surface->h};
+        SDL_RenderCopy(pMenu->renderer, nameTexture, NULL, &nameRect);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(nameTexture);
+
+    }
 
     SDL_RenderPresent(pMenu->renderer);
+}
+
+
+bool Button_load(tVector* pVec, const char* id, int x, int y, int w, int h) {
+    tButton button = {"", {x, y, w, h}, false};
+    strcpy(button.id, id);
+
+    if(!Vector_insertInOrder(pVec, &button, _Button_cmp, NULL)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Button_search(tVector* pVec, const char* id, tButton* button) {
+    strcpy(button->id, id);
+
+    if(Vector_bsearch(pVec, button, _Button_cmp) == -1) {
+        return false;
+    }
+    return true;
+}
+
+int _Button_cmp(const void* elem1, const void* elem2) {
+    const tButton* button1 = elem1;
+    const tButton* button2 = elem2;
+    return strcmp(button1->id, button2->id);
+}
+
+void _Button_update(void* elem1, const void* elem2) {
+    tButton* button1 = elem1;
+    const tButton* button2 = elem2;
+    button1->hover = button2->hover;
+}
+
+bool Button_isHover(tButton* button) {
+    return button->hover;
+}
+
+void Button_trueHover(tButton* button) {
+    button->hover = true;
+}
+
+void Button_falseHover(tButton* button) {
+    button->hover = false;
+}
+
+int Button_getX(tButton* button) {
+    return button->button.x;
+}
+
+int Button_getY(tButton* button) {
+    return button->button.y;
+}
+
+int Button_getW(tButton* button) {
+    return button->button.w;
+}
+
+int Button_getH(tButton* button) {
+    return button->button.h;
 }

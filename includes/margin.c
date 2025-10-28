@@ -117,42 +117,42 @@ void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
     strcpy(lives, pMargin->lives);
     strcpy(points, pMargin->points);
     for (i = 0; i < pMargin->width; i++) {
-        TextureManager_Draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
     }
     number = strchr(lives,  '\0');
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, WIDTH + WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, WIDTH + WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH, renderer);
     *number = '\0';
-    TextureManager_Draw(&pMargin->vecTex, lives, 0, WIDTH, WIDTH_NUMBERS, HEIGTH, renderer);
-    TextureManager_Draw(&pMargin->vecTex, "xHeart", 0,  2 * WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, lives, 0, WIDTH, WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "xHeart", 0,  2 * WIDTH, WIDTH, HEIGTH, renderer);
 
-    TextureManager_Draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
 
     i = pMargin->width / 2 * WIDTH - WIDTH;
     strcpy(lives, pMargin->keys);
 
-    TextureManager_Draw(&pMargin->vecTex, lives, 0, i + WIDTH_NUMBERS, WIDTH_NUMBERS, HEIGTH, renderer);
-    TextureManager_Draw(&pMargin->vecTex, "key", 0, i + WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, lives, 0, i + WIDTH_NUMBERS, WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "key", 0, i + WIDTH, WIDTH, HEIGTH, renderer);
 
 
     i = pMargin->width * WIDTH - WIDTH;
-    TextureManager_Draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
-    TextureManager_Draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
     number = strchr(points,  '\0');
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
 }
 
 void Margin_drawWin(tMargin* pMargin, SDL_Renderer* renderer) {
@@ -161,36 +161,36 @@ void Margin_drawWin(tMargin* pMargin, SDL_Renderer* renderer) {
     char* number;
     strcpy(points, pMargin->points);
     for (i = 0; i < pMargin->width; i++) {
-        TextureManager_Draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
     }
 
     if(pMargin->winH == false) {
-        TextureManager_Draw(&pMargin->vecTex, "win", 0, WIDTH, WIDTH_VICTORY, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "win", 0, WIDTH, WIDTH_VICTORY, HEIGTH, renderer);
         pMargin->winH = true;
     } else {
-        TextureManager_Draw(&pMargin->vecTex, "winH", 0, WIDTH, WIDTH_VICTORY, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "winH", 0, WIDTH, WIDTH_VICTORY, HEIGTH, renderer);
         pMargin->winH = false;
     }
-    TextureManager_Draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
 
     i = pMargin->width * WIDTH - WIDTH;
-    TextureManager_Draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
-    TextureManager_Draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
     number = strchr(points,  '\0');
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
 }
 
 void Margin_drawLost(tMargin* pMargin, SDL_Renderer* renderer) {
@@ -199,36 +199,36 @@ void Margin_drawLost(tMargin* pMargin, SDL_Renderer* renderer) {
     char* number;
     strcpy(points, pMargin->points);
     for (i = 0; i < pMargin->width; i++) {
-        TextureManager_Draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "margin", 0,  i * WIDTH, WIDTH, HEIGTH, renderer);
     }
 
     if(pMargin->lostH == false) {
-        TextureManager_Draw(&pMargin->vecTex, "lost", 0, WIDTH, WIDTH_LOST, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "lost", 0, WIDTH, WIDTH_LOST, HEIGTH, renderer);
         pMargin->lostH = true;
     } else {
-        TextureManager_Draw(&pMargin->vecTex, "lostH", 0, WIDTH, WIDTH_LOST, HEIGTH, renderer);
+        TextureManager_draw(&pMargin->vecTex, "lostH", 0, WIDTH, WIDTH_LOST, HEIGTH, renderer);
         pMargin->lostH = false;
     }
-    TextureManager_Draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginL", 0, 0, WIDTH, HEIGTH, renderer);
 
     i = pMargin->width * WIDTH - WIDTH;
-    TextureManager_Draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
-    TextureManager_Draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "marginR", 0,  i, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "points", 0,  i -= WIDTH, WIDTH, HEIGTH, renderer);
     number = strchr(points,  '\0');
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
     *number = '\0';
     number --;
-    TextureManager_Draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
+    TextureManager_draw(&pMargin->vecTex, number, 0, i -= WIDTH_NUMBERS,  WIDTH_NUMBERS, HEIGTH,renderer);
 }
 
 void Margin_clean(tMargin* pMargin) {

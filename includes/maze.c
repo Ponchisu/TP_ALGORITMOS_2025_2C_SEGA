@@ -239,7 +239,7 @@ void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, cons
     VectorIterator_first(&vecIter, elem);
     while(!VectorIterator_finished(&vecIter)) {
         if(_Elem_isAlive(elem) == true) {
-            TextureManager_Draw(pVecTex, id, _Elem_getY(elem) * HEIGTH + MARGIN_TOP, _Elem_getX(elem) * WIDTH,  WIDTH, HEIGTH, pRender);
+            TextureManager_draw(pVecTex, id, _Elem_getY(elem) * HEIGTH + MARGIN_TOP, _Elem_getX(elem) * WIDTH,  WIDTH, HEIGTH, pRender);
         }
         VectorIterator_next(&vecIter, elem);
     }
@@ -257,24 +257,24 @@ void Maze_draw(tMaze* pMaze, int marginDraw) {
     for (int rows = 0; rows < pMaze->rows; rows++) {
         for (int col = 0; col < pMaze->columns; col++) {
             if (pMaze->maze[rows][col] == '#') {
-                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == '.') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'S') {
-                TextureManager_Draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
-                TextureManager_Draw(&pMaze->vecTex, "starter", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "starter", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'E') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
-                TextureManager_Draw(&pMaze->vecTex, "exit", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "exit", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'F') {
-                TextureManager_Draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
         }
-        TextureManager_Draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+        TextureManager_draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
 
         if(marginDraw != VICTORY && marginDraw != LOST) {
             _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);

@@ -12,11 +12,21 @@
 #include "../headers/vector.h"
 #include "../headers/textureManager.h"
 
-#define SIZE_VECTEXMEN 11
+#define SIZE_VECTEXMEN 12
+#define SIZE_VECBUTTON 4
 #define SIZE_NAME 12
 
 #define WIDTH_MENU 600
 #define HEIGTH_MENU 800
+
+#define X_INSRTNAME 88
+#define Y_INSRTNAME 210
+#define WIDTH_INSRTNAME 256
+#define HEIGTH_INSRTNAME 24
+
+
+#define ISLETTER(a) (((a) >= 'a' && (a) <= 'z') || ((a) >= 'A' && (a) <= 'Z'))
+#define ISNUMBER(a) ((a) >= '0' && (a) <= '9')
 
 typedef struct
 {
@@ -24,27 +34,36 @@ typedef struct
     SDL_Renderer* renderer;
     SDL_Event event;
     tVector vecTex;
+    tVector vecButton;
     bool running;
     bool runningName;
     bool playGame;
     bool showRanking;
     Mix_Music* music;
     Mix_Chunk* click;
-    SDL_Rect buttonPlay;
-    bool buttonPlayH;
-    SDL_Rect buttonRanking;
-    bool buttonRankingH;
-    SDL_Rect buttonQuit;
-    bool buttonQuitH;
-    SDL_Rect buttonExit;
-    bool buttonExitH;
     TTF_Font* font;
-    SDL_Texture* insName;
-    SDL_Rect rectInsName;
 }tMenu;
+
+typedef struct {
+    char id[SIZE_ID];
+    SDL_Rect button;
+    bool hover;
+}tButton;
 
 bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer);
 void Menu_clean(tMenu** pMenu);
 bool Menu_running(tMenu* pMenu, char* pName);
+
+bool Button_load(tVector* pVec, const char* id, int x, int y, int w, int h);
+bool Button_search(tVector* pVec, const char* id, tButton* button);
+bool Button_isHover(tButton* button);
+void Button_trueHover(tButton* button);
+void Button_falseHover(tButton* button);
+int Button_getX(tButton* button);
+int Button_getY(tButton* button);
+int Button_getW(tButton* button);
+int Button_getH(tButton* button);
+
+
 
 #endif // MENU_H_INCLUDED

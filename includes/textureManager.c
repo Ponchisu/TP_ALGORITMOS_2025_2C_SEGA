@@ -23,15 +23,39 @@ bool TextureManager_load(tVector* pVec, const char* fileName, const char* id, SD
         if(!Vector_insertInOrder(pVec, &tex, _TextureManager_compararTex, NULL)){
             return false;
         }
-
-        return true;
     }
 
     return true;
 }
 
-void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer) {
+bool TextureManager_loadFont(tVector* pVec, char* text, const char* id, TTF_Font* font, SDL_Color color, SDL_Renderer* pRenderer) {
+    SDL_Surface* pTempSurface = TTF_RenderText_Solid(font, text, color);
+    SDL_Texture* pTexture;
+    tTexture tex;
 
+    if(pTempSurface == NULL){
+        return false;
+    }
+
+    pTexture = SDL_CreateTextureFromSurface(pRenderer, pTempSurface);
+
+    SDL_FreeSurface(pTempSurface);
+
+
+    if(pTexture != NULL) {
+        tex.texture = pTexture;
+        strncpy(tex.id, id, SIZE_ID - 1);
+        tex.id[SIZE_ID - 1] = '\0';
+
+        if(!Vector_insertInOrder(pVec, &tex, _TextureManager_compararTex, NULL)){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void TextureManager_draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer) {
     SDL_Rect srcRect;
     tTexture texture;
     SDL_Texture* tex;

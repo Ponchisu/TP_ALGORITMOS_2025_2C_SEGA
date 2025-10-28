@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "../headers/bool.h"
 #include "../headers/vector.h"
@@ -21,7 +22,8 @@ typedef struct{
 }tTexture;
 
 bool TextureManager_load(tVector* pVec, const char* fileName, const char* id, SDL_Renderer* pRenderer);
-void TextureManager_Draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer);
+bool TextureManager_loadFont(tVector* pVec, char* text, const char* id, TTF_Font* font, SDL_Color color, SDL_Renderer* pRenderer);
+void TextureManager_draw(tVector* pVec, const char* id, int y, int x, int width, int heigth, SDL_Renderer* pRenderer);
 void TextureManager_clean(tVector* pVec);
 
 #endif // TEXTUREMANAGER_H_INCLUDED
