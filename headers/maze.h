@@ -42,7 +42,12 @@ typedef struct
     char** maze;
     int rows;
     int columns;
+    int numLives;
+    int numGhosts;
+    int numAwards;
+    int maxLives;
     int points;
+    int keys;
     tPlayer player;
     tVector vecGhost;
     tVector vecTex;
@@ -50,7 +55,6 @@ typedef struct
     tVector vecAwards;
     tVector vecChunk;
     tVector vecKeys;
-    int keys;
     tMargin margin;
 }tMaze;
 
@@ -59,6 +63,7 @@ typedef bool (*Elem_getY)(const void* elem);
 typedef bool (*Elem_getX)(const void* elem);
 
 bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, int numLives, int numGhost, int numAwards, int maxLives, bool rei);
+bool Maze_createRun(tMaze* pMaze);
 void Maze_clean(tMaze** pMaze);
 void Maze_draw(tMaze* pMaze, int marginDraw);
 void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* colaMovement);

@@ -109,7 +109,7 @@ int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp) {
     return (mid - pVec->vec) / pVec->sizeElem;
 }
 
-bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
+bool Vector_update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
     void* posUpd;
     void* last;
 
@@ -131,8 +131,12 @@ bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update) {
     return false;
 }
 
-bool Vector_empty(tVector* pVec) {
+bool Vector_isEmpty(tVector* pVec) {
     return pVec->lotElem == 0;
+}
+
+void Vector_empty(tVector* pVec) {
+    pVec->lotElem = 0;
 }
 
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec) {

@@ -232,7 +232,7 @@ void Margin_drawLost(tMargin* pMargin, SDL_Renderer* renderer) {
 }
 
 void Margin_clean(tMargin* pMargin) {
-    if(Vector_empty(&pMargin->vecTex) == false) {
+    if(Vector_isEmpty(&pMargin->vecTex) == false) {
         TextureManager_clean(&pMargin->vecTex);
     }
     Vector_clean(&pMargin->vecTex);

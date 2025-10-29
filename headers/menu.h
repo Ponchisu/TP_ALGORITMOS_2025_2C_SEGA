@@ -11,6 +11,7 @@
 #include "../headers/bool.h"
 #include "../headers/vector.h"
 #include "../headers/textureManager.h"
+#include "../headers/game.h"
 
 #define SIZE_VECTEXMEN 12
 #define SIZE_VECBUTTON 4
@@ -30,8 +31,10 @@
 
 typedef struct
 {
+    tGame* game;
     SDL_Window* window;
     SDL_Renderer* renderer;
+    char name[SIZE_NAME];
     SDL_Event event;
     tVector vecTex;
     tVector vecButton;
@@ -50,9 +53,9 @@ typedef struct {
     bool hover;
 }tButton;
 
-bool Menu_create(tMenu** pMenu, SDL_Window* window, SDL_Renderer* renderer);
+bool Menu_create(tMenu** pMenu);
 void Menu_clean(tMenu** pMenu);
-bool Menu_running(tMenu* pMenu, char* pName);
+bool Menu_running(tMenu* pMenu);
 
 bool Button_load(tVector* pVec, const char* id, int x, int y, int w, int h);
 bool Button_search(tVector* pVec, const char* id, tButton* button);

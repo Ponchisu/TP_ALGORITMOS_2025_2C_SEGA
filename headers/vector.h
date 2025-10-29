@@ -31,8 +31,9 @@ bool Vector_create(tVector* pVec, unsigned sizeElem, unsigned capacity);
 void Vector_clean(tVector* pVec);
 bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update update);
 int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp);
-bool Vector_Update(tVector* pVec, const void* elem, Cmp cmp, Update update);
-bool Vector_empty(tVector* pVec);
+bool Vector_update(tVector* pVec, const void* elem, Cmp cmp, Update update);
+bool Vector_isEmpty(tVector* pVec);
+void Vector_empty(tVector* pVec);
 
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec);
 void VectorIterator_first(tVectorIterator* pVecIter, void* elem);

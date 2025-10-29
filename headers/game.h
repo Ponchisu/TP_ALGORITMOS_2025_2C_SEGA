@@ -11,9 +11,9 @@
 #include "../headers/config.h"
 #include "../headers/cola.h"
 #include "../headers/soundManager.h"
-#include "../headers/menu.h"
 
 #define SIZE_VECMUSIC 3
+#define SIZE_NAME 12
 
 typedef struct {
     SDL_Window* window;
@@ -21,17 +21,15 @@ typedef struct {
     SDL_Event event;
     tMaze* maze;
     bool running;
+    bool exit;
     tCola colaTurn;
     tCola colaMovement;
     tVector vecMusic;
-    tMenu* pMenu;
-    char name[SIZE_NAME];
 } tGame;
 
-bool Game_create(tGame** game);
-bool Game_init(tGame* game);
+bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render);
 void Game_clean(tGame** game);
-void Game_running(tGame* game);
+bool Game_running(tGame* game);
 
 
 #endif // GAME_H_INCLUDED

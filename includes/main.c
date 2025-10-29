@@ -9,20 +9,19 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../headers/game.h"
+#include "../headers/menu.h"
 
 int main(void) {
-    tGame* game;
+    tMenu* menu;
     srand(time(NULL));
 
-    Game_create(&game);
-    if(!Game_init(game)) {
-        Game_clean(&game);
+    if(!Menu_create(&menu)) {
+        Menu_clean(&menu);
         return 0;
     }
 
-    Game_running(game);
+    Menu_running(menu);
 
-    Game_clean(&game);
+    Menu_clean(&menu);
     return 0;
 }
