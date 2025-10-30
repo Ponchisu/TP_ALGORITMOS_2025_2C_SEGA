@@ -55,32 +55,6 @@ bool Config_getParametersFromFile(int* rows, int* columns, int* numLives, int* n
     }
 
     fclose(pf);
-
-    if(*rows == -1) {
-        fprintf(stderr, "Error no se ingresaron filas validas\n");
-        return false;
-    }
-    if(*columns == -1) {
-        fprintf(stderr, "Error no se ingresaron columnas validas\n");
-        return false;
-    }
-    if(*numLives == -1) {
-        fprintf(stderr, "Error no se ingresaron un numero de vidas valido\n");
-        return false;
-    }
-    if(*numGhosts == -1) {
-        fprintf(stderr, "Error no se ingresaron un numero de fantasma valido\n");
-        return false;
-    }
-    if(*numAwards == -1) {
-        fprintf(stderr, "Error no se ingreso un numero de premios valido\n");
-        return false;
-    }
-    if(*maxLives == -1) {
-        fprintf(stderr, "Error no se ingreso un numero de vidas valido\n");
-        return false;
-    }
-
     return true;
 }
 

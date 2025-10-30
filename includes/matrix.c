@@ -65,7 +65,7 @@ bool Matrix_loadFromFileTxt(void** mat, int rows, int columns, char* fileName, A
     return true;
 }
 
-bool Matrix_randomCreate(int rows, int columns, int density, int numGhosts, int numAwards, int numKeys, int numHeart, const char* fileName) {
+bool Matrix_randomCreate(int rows, int columns, int density, int numGhosts, int numAwards, int numKeys, int numCross, int numHeart, const char* fileName) {
     int x, y, wallDensity, r, my[4], mx[4], midX, midY;
     char** maze = (char**)Matrix_create(rows, columns, sizeof(char));
     if(maze == NULL) {
@@ -152,6 +152,15 @@ bool Matrix_randomCreate(int rows, int columns, int density, int numGhosts, int 
         if(maze[y][x] == '.') {
             maze[y][x] = 'A';
             numAwards--;
+        }
+    }
+
+    while(numCross != 0) {
+        x = rand() % (columns - 4) + 2;
+        y = rand() % (rows - 4) + 2;
+        if(maze[y][x] == '.') {
+            maze[y][x] = 'C';
+            numCross--;
         }
     }
 

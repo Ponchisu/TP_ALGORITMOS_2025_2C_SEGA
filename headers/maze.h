@@ -21,20 +21,23 @@
 #include "../headers/margin.h"
 #include "../headers/soundManager.h"
 #include "../headers/key.h"
+#include "../headers/cross.h"
 
 #define FILE_NAME "maze.txt"
 
 #define OK 0
+#define KILLGHOST 0
 #define LOST_LIVE 1
 #define ADD_LIVE 2
 #define LOST 3
 #define GET_AWARD 4
 #define VICTORY 5
 
-#define SIZE_VECTEX 9
+#define SIZE_VECTEX 12
 #define SIZE_VECCHUNK 5
 
 #define SIZE_VECKEYS 3
+#define SIZE_VECCROSS 2 
 
 typedef struct
 {
@@ -48,6 +51,8 @@ typedef struct
     int maxLives;
     int points;
     int keys;
+    bool cross;
+    int crossTurn;
     tPlayer player;
     tVector vecGhost;
     tVector vecTex;
@@ -55,6 +60,7 @@ typedef struct
     tVector vecAwards;
     tVector vecChunk;
     tVector vecKeys;
+    tVector vecCross;
     tMargin margin;
 }tMaze;
 

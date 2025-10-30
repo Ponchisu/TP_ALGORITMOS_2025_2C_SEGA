@@ -86,6 +86,11 @@ bool Margin_create(tMargin* pMargin, int lives, int width, int key, SDL_Renderer
         return false;
     }
 
+    if(!TextureManager_load(&pMargin->vecTex, "assets/cross.png", "cross", renderer)) {
+        fprintf(stderr, "Error al cargar imagen cross\n");
+        return false;
+    }
+
     sprintf(pMargin->lives, "%02d", lives);
     sprintf(pMargin->keys, "%d", key);
     strcpy(pMargin->points, "00000");
@@ -107,6 +112,10 @@ void Margin_updatePoints(tMargin* pMargin, int points) {
 
 void Margin_updateKey(tMargin* pMargin, int key) {
     sprintf(pMargin->keys, "%d", key);
+}
+
+void Margin_updateCross(tMargin* pMargin, int cross) {
+    sprintf(pMargin->cross, "%d", cross);
 }
 
 void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
@@ -131,8 +140,13 @@ void Margin_draw(tMargin* pMargin, SDL_Renderer* renderer) {
     i = pMargin->width / 2 * WIDTH - WIDTH;
     strcpy(lives, pMargin->keys);
 
-    TextureManager_draw(&pMargin->vecTex, lives, 0, i + WIDTH_NUMBERS, WIDTH_NUMBERS, HEIGTH, renderer);
-    TextureManager_draw(&pMargin->vecTex, "key", 0, i + WIDTH, WIDTH, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, lives, 0, i + WIDTH_NUMBERS + WIDTH, WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "key", 0, i + WIDTH + WIDTH, WIDTH, HEIGTH, renderer);
+
+    strcpy(lives, pMargin->cross);
+
+    TextureManager_draw(&pMargin->vecTex, lives, 0, i - WIDTH_NUMBERS, WIDTH_NUMBERS, HEIGTH, renderer);
+    TextureManager_draw(&pMargin->vecTex, "cross", 0, i, WIDTH, HEIGTH, renderer);
 
 
     i = pMargin->width * WIDTH - WIDTH;

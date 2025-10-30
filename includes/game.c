@@ -94,15 +94,6 @@ void Game_clean(tGame** game) {
         Maze_clean(&(*game)->maze);
     }
 
-    if((*game)->renderer != NULL) {
-        SDL_DestroyRenderer((*game)->renderer);
-        (*game)->renderer = NULL;
-    }
-    if((*game)->window != NULL) {
-        SDL_DestroyWindow((*game)->window);
-        (*game)->window = NULL;
-    }
-
     if((*game)->colaMovement != NULL) {
         Cola_clean(&(*game)->colaMovement);
         (*game)->colaMovement = NULL;
@@ -117,10 +108,6 @@ void Game_clean(tGame** game) {
         SoundManager_cleanMusic(&(*game)->vecMusic);
     }
     Vector_clean(&(*game)->vecMusic);
-
-    Mix_CloseAudio();
-    SDL_Quit();
-    TTF_Quit();
 
     free(*game);
     *game = NULL;

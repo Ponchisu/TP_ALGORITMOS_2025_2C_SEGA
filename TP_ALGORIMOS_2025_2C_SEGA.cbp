@@ -51,6 +51,7 @@
 		<Unit filename="headers/bool.h" />
 		<Unit filename="headers/cola.h" />
 		<Unit filename="headers/config.h" />
+		<Unit filename="headers/cross.h" />
 		<Unit filename="headers/game.h" />
 		<Unit filename="headers/ghost.h" />
 		<Unit filename="headers/key.h" />
@@ -72,6 +73,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/config.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includes/cross.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="includes/game.c">

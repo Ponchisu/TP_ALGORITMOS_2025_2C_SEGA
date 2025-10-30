@@ -19,6 +19,7 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
     Vector_init(&(*pMaze)->vecKeys);
     Vector_init(&(*pMaze)->vecLives);
     Vector_init(&(*pMaze)->vecTex);
+    Vector_init(&(*pMaze)->vecCross);
 
     (*pMaze)->renderer = renderer;
     (*pMaze)->rows = rows;
@@ -72,6 +73,11 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
+    if(!Vector_create(&(*pMaze)->vecCross, sizeof(tCross), SIZE_VECCROSS)) {
+        fprintf(stderr, "Error al crear vector de cross\n");
+        return false;
+    }
+
     if(!SoundManager_loadChunk(&(*pMaze)->vecChunk, "sound/points.wav", "points", 20)) {
         fprintf(stderr, "Error al cargar sonido points\n");
         return false;
@@ -112,6 +118,11 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/playerC.png", "playerC", renderer)) {
+        fprintf(stderr, "Error al cargar imagen Player\n");
+        return false;
+    }
+
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/floor.png", "floor", renderer)) {
         fprintf(stderr, "Error al cargar imagen Suelo\n");
         return false;
@@ -127,17 +138,31 @@ bool Maze_create(tMaze** pMaze, SDL_Renderer* renderer, int rows, int columns, i
         return false;
     }
 
+    if(!TextureManager_load(&(*pMaze)->vecTex, "assets/cross.png", "cross", renderer)) {
+        fprintf(stderr, "Error al cargar imagen Cross\n");
+        return false;
+    }
+
     if(rei == false) {
         if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost.png", "ghost", renderer)) {
             fprintf(stderr, "Error al cargar imagen Fantasma\n");
             return false;
         }
+        if(!TextureManager_load(&(*pMaze)->vecTex, "assets/ghost2.png", "ghost2", renderer)) {
+            fprintf(stderr, "Error al cargar imagen Fantasma2\n");
+            return false;
+        }
     } else {
         if(!TextureManager_load(&(*pMaze)->vecTex, "assets/rei.png", "ghost", renderer)) {
-            fprintf(stderr, "Error al cargar imagen Fantasma\n");
+            fprintf(stderr, "Error al cargar imagen rei\n");
+            return false;
+        }
+        if(!TextureManager_load(&(*pMaze)->vecTex, "assets/rei.png", "ghost2", renderer)) {
+            fprintf(stderr, "Error al cargar imagen rei\n");
             return false;
         }
     }
+
 
     if(!TextureManager_load(&(*pMaze)->vecTex, "assets/heart.png", "heart", renderer)) {
         fprintf(stderr, "Error al cargar imagen corazon\n");
@@ -157,11 +182,14 @@ bool Maze_createRun(tMaze* pMaze) {
     tAwards award;
     tLives live;
     tKeys key;
+    tCross cross;
     int idGhost = 0;
     int idAwards = 0;
     int idLives = 0;
     int idKey = 0;
-    if(!Matrix_randomCreate(pMaze->rows, pMaze->columns, 1, pMaze->numGhosts, pMaze->numAwards, SIZE_VECKEYS, pMaze->maxLives, FILE_NAME)) {
+    int idCross = 0;
+
+    if(!Matrix_randomCreate(pMaze->rows, pMaze->columns, 1, pMaze->numGhosts, pMaze->numAwards, SIZE_VECKEYS, SIZE_VECCROSS, pMaze->maxLives, FILE_NAME)) {
         fprintf(stderr, "Error al crear laberinto random\n");
         return false;
     }
@@ -172,12 +200,18 @@ bool Maze_createRun(tMaze* pMaze) {
     }
 
     pMaze->keys = SIZE_VECKEYS;
+    pMaze->points = 0;
+    pMaze->crossTurn = 0;
+    pMaze->cross = false;
+    Margin_updatePoints(&pMaze->margin, pMaze->cross);
     Margin_updateKey(&pMaze->margin, pMaze->keys);
+    Margin_updateCross(&pMaze->margin, pMaze->crossTurn);
 
     Vector_empty(&pMaze->vecAwards);
     Vector_empty(&pMaze->vecGhost);
     Vector_empty(&pMaze->vecKeys);
     Vector_empty(&pMaze->vecLives);
+    Vector_empty(&pMaze->vecCross);
 
     for (int i = 0; i < pMaze->rows; i++) {
         for (int j = 0; j < pMaze->columns; j++) {
@@ -215,7 +249,14 @@ bool Maze_createRun(tMaze* pMaze) {
                 pMaze->maze[i][j] = '.';
             } else if (pMaze->maze[i][j] == 'S') {
                 playerCreate(&pMaze->player, i, j, pMaze->numLives);
-            } else if(pMaze->maze[i][j] == 'E') {
+            } else if(pMaze->maze[i][j] == 'C') {
+                Cross_create(&cross, i, j, "");
+                Cross_numIde(&cross, idCross);
+                if(!Vector_insertInOrder(&pMaze->vecCross, &cross, Cross_cmp, NULL)) {
+                    return false;
+                }
+                idCross++;
+                pMaze->maze[i][j] = '.';
             }
         }
     }
@@ -289,13 +330,21 @@ void Maze_draw(tMaze* pMaze, int marginDraw) {
                 TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
             }
         }
-        TextureManager_draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
-
+        if(pMaze->cross == true) {
+            TextureManager_draw(&pMaze->vecTex, "playerC", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+        } else {
+            TextureManager_draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+        }
         if(marginDraw != VICTORY && marginDraw != LOST) {
-            _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+            if(pMaze->cross == true) {
+                _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost2", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+            } else {
+                _Maze_drawElem(&pMaze->vecGhost, &pMaze->vecTex, pMaze->renderer, "ghost", sizeof(tGhost), Ghost_isAlive, Ghost_getY, Ghost_getX);
+            }
             _Maze_drawElem(&pMaze->vecAwards, &pMaze->vecTex, pMaze->renderer, "award", sizeof(tAwards), Awards_isAlive, Awards_getY, Awards_getX);
             _Maze_drawElem(&pMaze->vecLives, &pMaze->vecTex, pMaze->renderer, "heart", sizeof(tLives), Lives_isAlive, Lives_getY, Lives_getX);
             _Maze_drawElem(&pMaze->vecKeys, &pMaze->vecTex, pMaze->renderer, "key", sizeof(tKeys), Key_isAlive, Key_getY, Key_getX);
+            _Maze_drawElem(&pMaze->vecCross, &pMaze->vecTex, pMaze->renderer, "cross", sizeof(tCross), Cross_isAlive, Cross_getY, Cross_getX);
         }
     }
 }
@@ -519,6 +568,10 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
     if(strcmp(move.id, "player") == 0) {
         SoundManager_playChunk(&pMaze->vecChunk, "turn");
         Player_movement(&pMaze->player, move);
+        if(pMaze->cross > 0) {
+            pMaze->crossTurn --;
+            Margin_updateCross(&pMaze->margin, pMaze->crossTurn);
+        }
         return true;
     }
 
@@ -542,6 +595,7 @@ int Maze_check(tMaze* pMaze) {
     tLives live;
     tAwards award;
     tKeys key;
+    tCross cross;
     tVectorIterator vecIter;
     int _return = OK;
 
@@ -553,6 +607,10 @@ int Maze_check(tMaze* pMaze) {
         pMaze->points += 2000;
         Margin_updatePoints(&pMaze->margin, pMaze->points);
         return VICTORY;
+    }
+
+    if(pMaze->crossTurn == 0) {
+        pMaze->cross = false;
     }
 
     VectorIterator_create(&vecIter, &pMaze->vecKeys);
@@ -577,6 +635,26 @@ int Maze_check(tMaze* pMaze) {
             }
         }
         VectorIterator_next(&vecIter, &key);
+    }
+
+    VectorIterator_create(&vecIter, &pMaze->vecCross);
+    VectorIterator_first(&vecIter, &cross);
+    while(!VectorIterator_finished(&vecIter)) {
+        if(Cross_isAlive(&cross) == true) {
+            elemX = Cross_getX(&cross);
+            elemY = Cross_getY(&cross);
+
+            if(elemX == playerX && elemY == playerY) {
+                SDL_Delay(100);
+                Cross_delete(&cross);
+                Vector_update(&pMaze->vecCross, &cross, Cross_cmp, Cross_update);
+                SoundManager_playChunk(&pMaze->vecChunk, "points");
+                pMaze->cross = true;
+                pMaze->crossTurn = 5;
+                Margin_updateCross(&pMaze->margin, pMaze->crossTurn);
+            }
+        }
+        VectorIterator_next(&vecIter, &cross);
     }
 
     VectorIterator_create(&vecIter, &pMaze->vecLives);
@@ -637,8 +715,15 @@ int Maze_check(tMaze* pMaze) {
             VectorIterator_next(&vecIter, &ghost);
         }
     }
-
-    if(_return == LOST_LIVE) {
+    if(pMaze->cross == true && _return == LOST_LIVE) {
+        // SDL_Delay(200);
+        // SoundManager_playChunk(&pMaze->vecChunk, "hit");
+        // Ghost_delete(&ghost);
+        // Vector_update(&pMaze->vecGhost, &ghost, Ghost_cmp, Ghost_update);
+        // pMaze->points += GET_KILLPOINTS;
+        // Margin_updatePoints(&pMaze->margin, pMaze->points);
+        _return = OK;
+    } else if(_return == LOST_LIVE) {
         SDL_Delay(200);
         SoundManager_playChunk(&pMaze->vecChunk, "hit");
         if(pMaze->points >= 150) {

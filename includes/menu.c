@@ -24,6 +24,9 @@ bool Menu_create(tMenu** pMenu) {
     Vector_init(&(*pMenu)->vecTex);
     Vector_init(&(*pMenu)->vecButton);
     (*pMenu)->game = NULL;
+    (*pMenu)->font = NULL;
+    (*pMenu)->music = NULL;
+    (*pMenu)->click = NULL;
 
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
@@ -193,6 +196,15 @@ void Menu_clean(tMenu** pMenu) {
 
     Vector_clean(&(*pMenu)->vecButton);
 
+    if((*pMenu)->renderer != NULL) {
+        SDL_DestroyRenderer((*pMenu)->renderer);
+        (*pMenu)->renderer = NULL;
+    }
+    if((*pMenu)->window != NULL) {
+        SDL_DestroyWindow((*pMenu)->window);
+        (*pMenu)->window = NULL;
+    }
+
     if((*pMenu)->game != NULL) {
         Game_clean(&(*pMenu)->game);
     }
@@ -201,12 +213,25 @@ void Menu_clean(tMenu** pMenu) {
         Mix_FreeMusic((*pMenu)->music);
     }
 
+    if((*pMenu)->click != NULL) {
+        Mix_FreeChunk((*pMenu)->click);
+    }
+
+    if((*pMenu)->font != NULL) {
+        TTF_CloseFont((*pMenu)->font);
+    } 
+    
+
+    Mix_CloseAudio();
+    SDL_Quit();
+    TTF_Quit();
+
     free(*pMenu);
 }
 
 bool Menu_running(tMenu* pMenu) {
     Mix_PlayMusic(pMenu->music, -1);
-    Mix_VolumeMusic(15);
+    Mix_VolumeMusic(10);
 
     _Menu_insertName(pMenu);
     while (pMenu->running == true) {
@@ -216,7 +241,7 @@ bool Menu_running(tMenu* pMenu) {
             pMenu->playGame = false;
             pMenu->running = Game_running(pMenu->game);
             Mix_PlayMusic(pMenu->music, -1);
-            Mix_VolumeMusic(15);
+            Mix_VolumeMusic(10);
             SDL_SetWindowSize(pMenu->window, 600 , 800);
             SDL_SetWindowPosition(pMenu->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         } else if(pMenu->showRanking == true) {
