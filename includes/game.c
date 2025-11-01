@@ -4,7 +4,7 @@ void _Game_handleEvents(tGame* game, bool isGame);
 void _Game_draw(tGame* game, int marginDraw);
 void _Game_update(tGame* game);
 
-bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render) {
+bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render, SOCKET* socket) {
     int rows, columns, numLive, numGhosts, numAwards, maxLives;
     bool rei;
 
@@ -14,12 +14,11 @@ bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render) {
     }
 
     (*game)->maze = NULL;
-    (*game)->renderer = NULL;
-    (*game)->window = NULL;
     (*game)->colaMovement = NULL;
     (*game)->colaTurn = NULL;
     (*game)->window = window;
     (*game)->renderer = render;
+    (*game)->socket = socket;
 
     Vector_init(&(*game)->vecMusic);
 
@@ -84,7 +83,7 @@ bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render) {
     Cola_create(&(*game)->colaTurn);
 
     (*game)->running = true;
-    (*game)->exit = true;
+    (*game)->exit = false;
 
     return true;
 }
@@ -121,14 +120,11 @@ void _Game_draw(tGame* game, int marginDraw) {
     SDL_RenderPresent(game->renderer);
 }
 
-void _Game_update(tGame* game) {
-
-}
-
-bool Game_running(tGame* game) {
+int Game_running(tGame* game, bool conect, char* name) {
     int state = OK;
     bool turn = false;
     char ghostKill = 'X';
+    char response[SIZE_RESPONSE];
     if(!Maze_createRun(game->maze)) {
         fprintf(stderr, "Error al crear la run\n");
         game->running = false;
@@ -141,7 +137,7 @@ bool Game_running(tGame* game) {
     }
     Cola_clean(&game->colaMovement);
     Cola_clean(&game->colaTurn);
-    while (game->running && state != LOST && state != VICTORY && game->exit == true) {
+    while (game->running && state != LOST && state != VICTORY && game->exit == false) {
         state = OK;
         if(turn == false) {
             _Game_handleEvents(game, true);
@@ -167,10 +163,13 @@ bool Game_running(tGame* game) {
     if(state == VICTORY) {
         puts("Ganaste papu esc para ir al menu");
         Mix_HaltMusic();
+        if(conect == true) {
+            sendRun(game->socket, name, Maze_getPoints(game->maze), Maze_getMoves(game->maze), response);
+        }
         SoundManager_playMusic(&game->vecMusic, "musicVictory");
         SDL_Delay(800);
         Maze_resetPlayer(game->maze);
-        while(game->running) {
+        while(game->running && game->exit == false) {
             _Game_handleEvents(game, false);
             _Game_draw(game, VICTORY);
             Maze_recreateGame(game->maze, &game->colaMovement);
@@ -185,18 +184,21 @@ bool Game_running(tGame* game) {
         SoundManager_playMusic(&game->vecMusic, "musicLost");
         SDL_Delay(800);
         Maze_resetPlayer(game->maze);
-        while(game->running) {
+        while(game->running && game->exit == false) {
             _Game_handleEvents(game, false);
             _Game_draw(game, LOST);
             Maze_recreateGame(game->maze, &game->colaMovement);
             SDL_Delay(216);
         }
     }
+    if(game->exit == true) {
+        state = EXIT;
+    }
 
     Mix_HaltMusic();
     game->running = true;
 
-    return game->exit;
+    return state;
  }
 
  void _Game_handleEvents(tGame* game, bool isGame) {
@@ -204,7 +206,7 @@ bool Game_running(tGame* game) {
         switch (game->event.type) {
         case SDL_QUIT:
             puts("Enter para salir");
-            game->exit = false;
+            game->exit = true;
             break;
         case SDL_KEYDOWN:
             switch (game->event.key.keysym.scancode) {

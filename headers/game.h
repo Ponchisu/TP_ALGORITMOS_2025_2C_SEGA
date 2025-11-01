@@ -11,14 +11,16 @@
 #include "../headers/config.h"
 #include "../headers/cola.h"
 #include "../headers/soundManager.h"
+#include "../headers/client.h"
 
 #define SIZE_VECMUSIC 3
-#define SIZE_NAME 12
+#define SIZE_RESPONSE 1024
 
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Event event;
+    SOCKET* socket;
     tMaze* maze;
     bool running;
     bool exit;
@@ -27,9 +29,9 @@ typedef struct {
     tVector vecMusic;
 } tGame;
 
-bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render);
+bool Game_create(tGame** game, SDL_Window* window, SDL_Renderer * render, SOCKET* socket);
 void Game_clean(tGame** game);
-bool Game_running(tGame* game);
+int Game_running(tGame* game, bool conect, char* name);
 
 
 #endif // GAME_H_INCLUDED

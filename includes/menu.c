@@ -23,11 +23,16 @@ bool Menu_create(tMenu** pMenu) {
 
     Vector_init(&(*pMenu)->vecTex);
     Vector_init(&(*pMenu)->vecButton);
+    Vector_init(&(*pMenu)->vecRank);
     (*pMenu)->game = NULL;
     (*pMenu)->font = NULL;
     (*pMenu)->music = NULL;
     (*pMenu)->click = NULL;
-
+    (*pMenu)->window = NULL;
+    (*pMenu)->renderer = NULL;
+    (*pMenu)->click = NULL;
+    (*pMenu)->music = NULL;
+    
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
@@ -43,7 +48,7 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
-    (*pMenu)->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 800, 0);
+    (*pMenu)->window = SDL_CreateWindow("Maze and Ghost", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH_MENU, HEIGTH_MENU, 0);
     if(!(*pMenu)->window) {
         fprintf(stderr, "Error al crear window: %s\n", SDL_GetError());
         return false;
@@ -65,11 +70,25 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
+    if (init_winsock() != 0) {
+        fprintf(stderr, "Error al inicializar Winsock\n");
+        return false;
+    }
+
+    (*pMenu)->socket = connect_to_server(SERVER_IP, PORT);
+    if ((*pMenu)->socket == INVALID_SOCKET) {
+        fprintf(stderr, "No se pudo conectar al servidor\n");
+        WSACleanup();
+        (*pMenu)->conect = false;
+    } else {
+        (*pMenu)->conect = true;
+    }
+
     SDL_SetWindowIcon((*pMenu)->window, icon);
     SDL_FreeSurface(icon);
     icon = NULL;
 
-    if(!Game_create(&(*pMenu)->game, (*pMenu)->window, (*pMenu)->renderer)) {
+    if(!Game_create(&(*pMenu)->game, (*pMenu)->window, (*pMenu)->renderer, &(*pMenu)->socket)) {
         fprintf(stderr, "Error al crear juego\n");
         return false;
     }
@@ -86,6 +105,11 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
     Mix_VolumeChunk((*pMenu)->click, 15);
+
+    if(!Vector_create(&(*pMenu)->vecRank, sizeof(tTexture), SIZE_VECRANK)) {
+        fprintf(stderr, "Error al crear vector\n");
+        return false;
+    }
 
     if(!Vector_create(&(*pMenu)->vecTex, sizeof(tTexture), SIZE_VECTEXMEN)) {
         fprintf(stderr, "Error al crear vector\n");
@@ -148,16 +172,32 @@ bool Menu_create(tMenu** pMenu) {
     }
 
     (*pMenu)->font = TTF_OpenFont("assets/Monocraft.ttf", 24);
+    if((*pMenu)->font == NULL) {
+        fprintf(stderr, "Error al cargar fuente\n");
+        return false;
+    }
 
     if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Insertar nombre:", "insrtName", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
         fprintf(stderr, "Error al cargar Insertar nombre:\n");
         return false;
+    }
+    if((*pMenu)->conect == true) {
+        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Connected", "conection", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
+            fprintf(stderr, "Error al cargar Insertar conect:\n");
+            return false;
+        }
+    } else {
+        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Disconnected", "conection", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
+            fprintf(stderr, "Error al cargar Insertar conect:\n");
+            return false;
+        }
     }
 
     (*pMenu)->running = true;
     (*pMenu)->runningName = true;
     (*pMenu)->playGame = false;
     (*pMenu)->showRanking = false;
+    (*pMenu)->createRank = true;
     strcpy((*pMenu)->name, "");
 
     if(!Vector_create(&(*pMenu)->vecButton, sizeof(tButton), SIZE_VECBUTTON)) {
@@ -165,22 +205,22 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "play", 156, 260, 249, 89)) {
+    if(!Button_load(&(*pMenu)->vecButton, "play", X_BMENU, Y_BPLAY, W_BMENU,H_BMENU )) {
         fprintf(stderr, "Error al cargar button play\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "ranking", 156, 359, 249, 89)) {
+    if(!Button_load(&(*pMenu)->vecButton, "ranking", X_BMENU, Y_BRANK, W_BMENU, H_BMENU)) {
         fprintf(stderr, "Error al cargar button Ranking\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "quit", 156, 458, 249, 89)) {
+    if(!Button_load(&(*pMenu)->vecButton, "quit", X_BMENU, Y_BQUIT, W_BMENU, H_BMENU)) {
         fprintf(stderr, "Error al cargar button Quit\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "exit", 8, 10, 93, 59)) {
+    if(!Button_load(&(*pMenu)->vecButton, "exit", X_BEXIT, Y_BEXIT, W_BEXIT, H_BEXIT)) {
         fprintf(stderr, "Error al cargar button Exit\n");
         return false;
     }
@@ -196,22 +236,29 @@ void Menu_clean(tMenu** pMenu) {
 
     Vector_clean(&(*pMenu)->vecButton);
 
-    if((*pMenu)->renderer != NULL) {
-        SDL_DestroyRenderer((*pMenu)->renderer);
-        (*pMenu)->renderer = NULL;
+    if(Vector_isEmpty(&(*pMenu)->vecRank) == false) {
+        TextureManager_clean(&(*pMenu)->vecRank);
     }
-    if((*pMenu)->window != NULL) {
-        SDL_DestroyWindow((*pMenu)->window);
-        (*pMenu)->window = NULL;
-    }
+   Vector_clean(&(*pMenu)->vecRank);
+
 
     if((*pMenu)->game != NULL) {
         Game_clean(&(*pMenu)->game);
     }
 
-    if((*pMenu)->music != NULL) {
-        Mix_FreeMusic((*pMenu)->music);
+    if((*pMenu)->renderer != NULL) {
+        SDL_DestroyRenderer((*pMenu)->renderer);
+        (*pMenu)->renderer = NULL;
     }
+
+    if((*pMenu)->window != NULL) {
+        SDL_DestroyWindow((*pMenu)->window);
+        (*pMenu)->window = NULL;
+    }
+
+    if((*pMenu)->music != NULL) {
+            Mix_FreeMusic((*pMenu)->music);
+        }
 
     if((*pMenu)->click != NULL) {
         Mix_FreeChunk((*pMenu)->click);
@@ -219,8 +266,9 @@ void Menu_clean(tMenu** pMenu) {
 
     if((*pMenu)->font != NULL) {
         TTF_CloseFont((*pMenu)->font);
-    } 
-    
+    }
+
+    close_connection(&(*pMenu)->socket);
 
     Mix_CloseAudio();
     SDL_Quit();
@@ -230,24 +278,35 @@ void Menu_clean(tMenu** pMenu) {
 }
 
 bool Menu_running(tMenu* pMenu) {
+    int state = OK;
+    char response[BUFFER_SIZE];
     Mix_PlayMusic(pMenu->music, -1);
     Mix_VolumeMusic(10);
 
     _Menu_insertName(pMenu);
-    while (pMenu->running == true) {
+    if(pMenu->conect == true) {
+        sendPlayer(&pMenu->socket, pMenu->name, response);
+    }
+
+
+    while (pMenu->running == true && state != EXIT) {
         _Menu_handleEvents(pMenu);
 
         if(pMenu->playGame == true) {
             pMenu->playGame = false;
-            pMenu->running = Game_running(pMenu->game);
+            state = Game_running(pMenu->game, pMenu->conect, pMenu->name);
             Mix_PlayMusic(pMenu->music, -1);
             Mix_VolumeMusic(10);
-            SDL_SetWindowSize(pMenu->window, 600 , 800);
+            SDL_SetWindowSize(pMenu->window, WIDTH_MENU , HEIGTH_MENU);
             SDL_SetWindowPosition(pMenu->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         } else if(pMenu->showRanking == true) {
             _Menu_rankingShow(pMenu);
         } else {
             _Menu_draw(pMenu);
+        }
+
+        if(state == VICTORY) {
+            pMenu->createRank = true;
         }
 
         SDL_Delay(16);
@@ -308,7 +367,9 @@ void _Menu_handleEvents(tMenu* pMenu) {
                 }
                 if (pMenu->event.button.button == SDL_BUTTON_LEFT) {
                     if (x >= Button_getX(&bRanking) && x <= Button_getX(&bRanking) + Button_getW(&bRanking) && y >= Button_getY(&bRanking) && y <= Button_getY(&bRanking) + Button_getH(&bRanking)) {
-                        pMenu->showRanking = true;
+                        if(pMenu->conect == true) {
+                            pMenu->showRanking = true;
+                        }
                         Mix_PlayChannel(-1, pMenu->click, 0);
                     }
                 }
@@ -322,51 +383,79 @@ void _Menu_handleEvents(tMenu* pMenu) {
                 break;
         }
     }
- }
+}
 
-  void _Menu_draw(tMenu* pMenu) {
+void _Menu_draw(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
     tButton button;
-    int x, y, w, h;
 
-    TextureManager_draw(&pMenu->vecTex, "menu", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "menu", 0, 0, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "conection", 0, WIDTH_MENU - (pMenu->conect == true ? WIDTH_TCONECT : WIDTH_FCONECT), pMenu->renderer);
     Button_search(&pMenu->vecButton, "play", &button);
-    x = Button_getX(&button);
-    y = Button_getY(&button);
-    w = Button_getW(&button);
-    h = Button_getH(&button);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bPlayH", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bPlayH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bPlay", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bPlay", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     Button_search(&pMenu->vecButton, "ranking", &button);
-    x = Button_getX(&button);
-    y = Button_getY(&button);
-    w = Button_getW(&button);
-    h = Button_getH(&button);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bRankH", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bRankH", Button_getY(&button), Button_getX(&button),  pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bRank", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bRank", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     Button_search(&pMenu->vecButton, "quit", &button);
-    x = Button_getX(&button);
-    y = Button_getY(&button);
-    w = Button_getW(&button);
-    h = Button_getH(&button);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bQuitH", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bQuitH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bQuit", y, x, w, h, pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bQuit", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     SDL_RenderPresent(pMenu->renderer);
- }
+}
+
+bool _Menu_createRanking(tMenu* pMenu) {
+    char buffer[BUFFER_SIZE];
+    char* pipe;
+    char* player;
+    char pRank[SIZE_PRANK];
+    int id;
+    char name[SIZE_NAME];
+    int points;
+    SDL_Color color = {255, 255, 255, 255};
+
+    getRanking(&pMenu->socket, buffer);
+
+    if(Vector_isEmpty(&pMenu->vecRank) == false) {
+        TextureManager_clean(&pMenu->vecRank);
+    }
+    Vector_empty(&pMenu->vecRank);
+
+    player = buffer;
+    player++;
+    pipe = strchr(player, '|');
+    while (pipe) {
+        *pipe = '\0';
+        sscanf(player, "%d %10s %d", &id, name, &points);
+        sprintf(pRank, "%-10s        %8d", name, points);
+        if(!TextureManager_loadFontNotID(&pMenu->vecRank, pRank, pMenu->font, color, pMenu->renderer)) {
+            puts("ERROR");
+            return false;
+        }
+        player = pipe + 1;
+        pipe = strchr(player, '|');
+    }
+    
+
+    pMenu->createRank = false;
+    return true;
+}
 
 void _Menu_rankingShow(tMenu* pMenu) {
+    if(pMenu->createRank == true) {
+        _Menu_createRanking(pMenu);
+    }
     while (pMenu->showRanking == true) {
         _Menu_handleEventsRank(pMenu);
 
@@ -419,12 +508,17 @@ void _Menu_drawRank(tMenu* pMenu) {
 
     Button_search(&pMenu->vecButton, "exit", &button);
 
-    TextureManager_draw(&pMenu->vecTex, "rank", 0, 0, 600, 800, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "rank", 0, 0, pMenu->renderer);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bExitH", Button_getY(&button), Button_getX(&button), Button_getW(&button), Button_getH(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bExitH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bExit", Button_getY(&button), Button_getX(&button), Button_getW(&button), Button_getH(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bExit", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
+
+    if(Vector_isEmpty(&pMenu->vecRank) == false) {
+        TextureManager_drawVec(&pMenu->vecRank, X_RANK, Y_RANK, DISTANCE_RANK, pMenu->renderer);
+    }
+
 
     SDL_RenderPresent(pMenu->renderer);
  }
@@ -442,6 +536,7 @@ void _Menu_drawRank(tMenu* pMenu) {
  }
 
  void _Menu_handleinsertName(tMenu* pMenu) {
+    char c;
         while(SDL_PollEvent(&pMenu->event)) {
         switch (pMenu->event.type) {
         case SDL_QUIT:
@@ -450,7 +545,8 @@ void _Menu_drawRank(tMenu* pMenu) {
             break;
         case SDL_TEXTINPUT:
                 if (strlen(pMenu->name) + strlen(pMenu->event.text.text) < SIZE_NAME && (ISNUMBER(pMenu->event.text.text[0]) || ISLETTER(pMenu->event.text.text[0]))) {
-                    strcat(pMenu->name, pMenu->event.text.text);
+                    c = toupper(pMenu->event.text.text[0]);
+                    strcat(pMenu->name, &c);
                 }
             break;
         case SDL_KEYDOWN:
@@ -475,8 +571,8 @@ void _Menu_drawRank(tMenu* pMenu) {
 void _Menu_insertNameDraw(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
 
-    TextureManager_draw(&pMenu->vecTex, "mName", 0, 0, WIDTH_MENU, HEIGTH_MENU, pMenu->renderer);
-    TextureManager_draw(&pMenu->vecTex, "insrtName", Y_INSRTNAME, X_INSRTNAME, WIDTH_INSRTNAME, HEIGTH_INSRTNAME, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "mName", 0, 0, pMenu->renderer);
+    TextureManager_draw(&pMenu->vecTex, "insrtName", Y_INSRTNAME, X_INSRTNAME,  pMenu->renderer);
 
     if(strlen(pMenu->name) > 0) {
         SDL_Color color = {255, 255, 255, 255};
@@ -487,7 +583,6 @@ void _Menu_insertNameDraw(tMenu* pMenu) {
         SDL_RenderCopy(pMenu->renderer, nameTexture, NULL, &nameRect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(nameTexture);
-
     }
 
     SDL_RenderPresent(pMenu->renderer);

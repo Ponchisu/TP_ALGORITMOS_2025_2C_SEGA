@@ -202,6 +202,7 @@ bool Maze_createRun(tMaze* pMaze) {
     pMaze->keys = SIZE_VECKEYS;
     pMaze->points = 0;
     pMaze->crossTurn = 0;
+    pMaze->movesTurn = 0;
     pMaze->cross = false;
     Margin_updatePoints(&pMaze->margin, pMaze->cross);
     Margin_updateKey(&pMaze->margin, pMaze->keys);
@@ -295,7 +296,7 @@ void _Maze_drawElem(tVector* pVec, tVector* pVecTex, SDL_Renderer* pRender, cons
     VectorIterator_first(&vecIter, elem);
     while(!VectorIterator_finished(&vecIter)) {
         if(_Elem_isAlive(elem) == true) {
-            TextureManager_draw(pVecTex, id, _Elem_getY(elem) * HEIGTH + MARGIN_TOP, _Elem_getX(elem) * WIDTH,  WIDTH, HEIGTH, pRender);
+            TextureManager_draw(pVecTex, id, _Elem_getY(elem) * HEIGTH + MARGIN_TOP, _Elem_getX(elem) * WIDTH, pRender);
         }
         VectorIterator_next(&vecIter, elem);
     }
@@ -313,27 +314,27 @@ void Maze_draw(tMaze* pMaze, int marginDraw) {
     for (int rows = 0; rows < pMaze->rows; rows++) {
         for (int col = 0; col < pMaze->columns; col++) {
             if (pMaze->maze[rows][col] == '#') {
-                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == '.') {
-                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'S') {
-                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
-                TextureManager_draw(&pMaze->vecTex, "starter", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "wall", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "starter", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'E') {
-                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
-                TextureManager_draw(&pMaze->vecTex, "exit", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "exit", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
             }
             if (pMaze->maze[rows][col] == 'F') {
-                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+                TextureManager_draw(&pMaze->vecTex, "floor", rows * HEIGTH + MARGIN_TOP, col * WIDTH, pMaze->renderer);
             }
         }
         if(pMaze->cross == true) {
-            TextureManager_draw(&pMaze->vecTex, "playerC", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+            TextureManager_draw(&pMaze->vecTex, "playerC", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, pMaze->renderer);
         } else {
-            TextureManager_draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, WIDTH, HEIGTH, pMaze->renderer);
+            TextureManager_draw(&pMaze->vecTex, "player", Player_getY(&pMaze->player) * HEIGTH + 32,  Player_getX(&pMaze->player) * WIDTH, pMaze->renderer);
         }
         if(marginDraw != VICTORY && marginDraw != LOST) {
             if(pMaze->cross == true) {
@@ -406,74 +407,39 @@ void Maze_handleEvents(tMaze* pMaze, SDL_Event* event, tCola* colaTurn, tCola* c
     }
 }
 
+
 bool _Maze_ghostMovementIsValid(tMaze* pMaze, int newX, int newY) {
-    if(pMaze->maze[newY][newX] == '.') {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void _Maze_ghostMovementInvertDir(int* dirX, int* dirY) {
-    *dirX = - *dirX;
-    *dirY = - *dirY;
-}
-
-bool _Maze_ghostMovementIsIntersection(tMaze* pMaze, int posX, int posY, int dirX, int dirY) {
-    int count = 0;
-
-    if (pMaze->maze[posY - 1][posX] == '.')
-        count++;
-    if (pMaze->maze[posY + 1][posX] == '.')
-        count++;
-    if (pMaze->maze[posY][posX - 1] == '.')
-        count++;
-    if (pMaze->maze[posY][posX + 1] == '.')
-        count++;
-
-    if (dirX > 0 && pMaze->maze[posY][posX - 1] == '.')
-        count--;
-    else if (dirX < 0 && pMaze->maze[posY][posX + 1] == '.')
-        count--;
-    else if (dirY > 0 && pMaze->maze[posY - 1][posX] == '.')
-        count--;
-    else if (dirY < 0 && pMaze->maze[posY + 1][posX] == '.')
-        count--;
-
-    return count > 1;
+    return pMaze->maze[newY][newX] == '.';
 }
 
 void _Maze_ghostFollowPos(tMaze* pMaze, int posX, int posY, int ghostX, int ghostY, int dirGhostX, int dirGhostY, tMovement* move) {
-    int xDist = abs(posX - ghostX);
-    int yDist = abs(posY - ghostY);
-    if (xDist > yDist) {
-        if (posX < ghostX && dirGhostX != 1 && _Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY)) {
-            move->vecX = -1;
-            move->vecY = 0;
-        } else if (posX > ghostX && dirGhostX != -1 && _Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY)) {
-            move->vecX = 1;
-            move->vecY = 0;
-        } else if (dirGhostY != 1 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1)) {
-            move->vecX = 0;
-            move->vecY = -1;
-        } else if (dirGhostY != -1 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1)) {
-            move->vecX = 0;
-            move->vecY = 1;
+    int distance;
+    int dirXInv = dirGhostX * -1, dirYInv = dirGhostY * -1; 
+    int minorDist = 99999;
+    int nextX, nextY;
+
+    int vecX[] = {0, -1, 0, 1}; 
+    int vecY[] = {-1, 0, 1, 0};
+
+    move->vecX = 0;
+    move->vecY = 0;
+
+    for(int i = 0; i< 4; i++) {
+        nextX = ghostX + vecX[i];
+        nextY = ghostY + vecY[i];
+        if(!(vecX[i] == dirXInv &&  vecY[i] == dirYInv) && _Maze_ghostMovementIsValid(pMaze, nextX, nextY)) {
+            distance = abs(posX - nextX) + abs(posY - nextY);
+            if(distance < minorDist) {
+                minorDist = distance;
+                move->vecX = vecX[i];
+                move->vecY = vecY[i];
+            }
         }
-    } else {
-        if (posY < ghostY && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1) && dirGhostY != 1) {
-            move->vecX = 0;
-            move->vecY = -1;
-        } else if (posY > ghostY && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1) && dirGhostY != -1) {
-            move->vecX = 0;
-            move->vecY = 1;
-        } else if (_Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY) && dirGhostX != 1) {
-            move->vecX = -1;
-            move->vecY = 0;
-        } else if (_Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY) && dirGhostX != -1) {
-            move->vecX = 1;
-            move->vecY = 0;
-        }
+    }
+
+    if(move->vecX == 0 && move->vecY == 0) {
+        move->vecX = dirXInv;
+        move->vecY = dirYInv;
     }
 }
 
@@ -500,54 +466,28 @@ void _Maze_ghostMovement(tMaze* pMaze, tCola* colaTurn) {
             dirGhostY = Ghost_getDirY(&ghost);
             tipeMove = Ghost_getTipeMove(&ghost);
 
-            move.vecX = dirGhostX;
-            move.vecY = dirGhostY;
-
-            if(_Maze_ghostMovementIsIntersection(pMaze, ghostX, ghostY, dirGhostX, dirGhostY) == true) {
-                switch(tipeMove) {
-                    case FOLLOW:
-                        _Maze_ghostFollowPos(pMaze, playerX, playerY, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+            switch(tipeMove) {
+                case FOLLOW:
+                    _Maze_ghostFollowPos(pMaze, playerX, playerY, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                break;
+                case SEMI_RANDOM:
+                _Maze_ghostFollowPos(pMaze, playerY, playerX, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                break;
+                case RANDOM:
+                _Maze_ghostFollowPos(pMaze, rand() %(pMaze->columns - 2) + 1, rand() % (pMaze->rows - 2) + 1, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                break;
+                case TOP_LEFT:
+                    _Maze_ghostFollowPos(pMaze, 0, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                     break;
-                    case SEMI_RANDOM:
-                    _Maze_ghostFollowPos(pMaze, playerY, playerX, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                case TOP_RIGHT:
+                    _Maze_ghostFollowPos(pMaze, pMaze->columns, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                     break;
-                    case RANDOM:
-                    _Maze_ghostFollowPos(pMaze, rand() %(pMaze->columns - 2) + 1, rand() % (pMaze->rows - 2) + 1, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                case BOT_LEFT:
+                    _Maze_ghostFollowPos(pMaze, 0, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
                     break;
-                    case TOP_LEFT:
-                        _Maze_ghostFollowPos(pMaze, 0, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
-                    case TOP_RIGHT:
-                        _Maze_ghostFollowPos(pMaze, pMaze->columns, 0, ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
-                    case BOT_LEFT:
-                        _Maze_ghostFollowPos(pMaze, 0, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
-                    case BOT_RIGHT:
-                        _Maze_ghostFollowPos(pMaze, pMaze->columns, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
-                        break;
-                }
-            } else if(!_Maze_ghostMovementIsValid(pMaze, ghostX + dirGhostX, ghostY + dirGhostY)) {
-                if (dirGhostX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX - 1, ghostY)) {
-                    move.vecX = -1;
-                    move.vecY = 0;
-                }
-                else if (dirGhostX == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX + 1, ghostY)) {
-                    move.vecX = 1;
-                    move.vecY = 0;
-                }
-                else if (dirGhostY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY + 1)) {
-                    move.vecX = 0;
-                    move.vecY = 1;
-                }
-                else if (dirGhostY == 0 && _Maze_ghostMovementIsValid(pMaze, ghostX, ghostY - 1)) {
-                    move.vecX = 0;
-                    move.vecY = -1;
-                } else {
-                    _Maze_ghostMovementInvertDir(&dirGhostX, &dirGhostY);
-                    move.vecX = dirGhostX;
-                    move.vecY = dirGhostY;
-                }
+                case BOT_RIGHT:
+                    _Maze_ghostFollowPos(pMaze, pMaze->columns, pMaze->rows, ghostX, ghostY, dirGhostX, dirGhostY, &move);
+                    break;
             }
             Ghost_getId(&ghost, id);
             strcpy(move.id, id);
@@ -568,6 +508,7 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn) {
     if(strcmp(move.id, "player") == 0) {
         SoundManager_playChunk(&pMaze->vecChunk, "turn");
         Player_movement(&pMaze->player, move);
+        pMaze->movesTurn++;
         if(pMaze->cross > 0) {
             pMaze->crossTurn --;
             Margin_updateCross(&pMaze->margin, pMaze->crossTurn);
@@ -604,7 +545,7 @@ int Maze_check(tMaze* pMaze) {
     lives = Player_getLives(&pMaze->player);
 
     if(pMaze->maze[playerY][playerX] == 'E') {
-        pMaze->points += 2000;
+        pMaze->points += GET_POINTS_VICTORY;
         Margin_updatePoints(&pMaze->margin, pMaze->points);
         return VICTORY;
     }
@@ -692,7 +633,7 @@ int Maze_check(tMaze* pMaze) {
                 SoundManager_playChunk(&pMaze->vecChunk, "points");
                 Awards_delete(&award);
                 Vector_update(&pMaze->vecAwards, &award, Awards_cmp, Awards_update);
-                pMaze->points += GET_POINTS;
+                pMaze->points += GET_POINTS_AWARDS;
                 Margin_updatePoints(&pMaze->margin, pMaze->points);
             }
         }
@@ -716,18 +657,12 @@ int Maze_check(tMaze* pMaze) {
         }
     }
     if(pMaze->cross == true && _return == LOST_LIVE) {
-        // SDL_Delay(200);
-        // SoundManager_playChunk(&pMaze->vecChunk, "hit");
-        // Ghost_delete(&ghost);
-        // Vector_update(&pMaze->vecGhost, &ghost, Ghost_cmp, Ghost_update);
-        // pMaze->points += GET_KILLPOINTS;
-        // Margin_updatePoints(&pMaze->margin, pMaze->points);
         _return = OK;
     } else if(_return == LOST_LIVE) {
         SDL_Delay(200);
         SoundManager_playChunk(&pMaze->vecChunk, "hit");
-        if(pMaze->points >= 150) {
-            pMaze->points -= 150;
+        if(pMaze->points >= SUBTRACT_POINTS) {
+            pMaze->points -= SUBTRACT_POINTS;
             Margin_updatePoints(&pMaze->margin, pMaze->points);
         }
         if(lives != 0) {
@@ -742,7 +677,6 @@ int Maze_check(tMaze* pMaze) {
             pMaze->points = 0;
             Margin_updatePoints(&pMaze->margin, pMaze->points);
         }
-
     }
 
     return _return;
@@ -769,6 +703,14 @@ int Maze_getColumns(tMaze* pMaze) {
 
 int Maze_getRows(tMaze* pMaze) {
     return pMaze->rows;
+}
+
+int Maze_getPoints(tMaze* pMaze) {
+    return pMaze->points;
+}
+
+int Maze_getMoves(tMaze* pMaze) {
+    return pMaze->movesTurn;
 }
 
 void Maze_resetPlayer(tMaze* pMaze) {

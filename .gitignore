@@ -4,6 +4,8 @@
 *.layout
 *.a
 *.txt
+*.dat
+*.idx
 
 *.dll
 SDL2/

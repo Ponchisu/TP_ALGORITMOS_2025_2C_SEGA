@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="DataBase" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/DataBase" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/DataBase" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Linker>
+			<Add library="ws2_32" />
+		</Linker>
+		<Unit filename="../Facultad/Cursando/TP_ALGORITMOS_2025_2C_SEGA/TP_ALGORIMOS_2025_2C_SEGA.cbp" />
+		<Unit filename="headersDB/bool.h" />
+		<Unit filename="headersDB/cola.h" />
+		<Unit filename="headersDB/dbManager.h" />
+		<Unit filename="headersDB/fileManager.h" />
+		<Unit filename="headersDB/list.h" />
+		<Unit filename="headersDB/server.h" />
+		<Unit filename="headersDB/tree.h" />
+		<Unit filename="includesDB/cola.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/dbManager.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/fileManager.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/server.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="includesDB/tree.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

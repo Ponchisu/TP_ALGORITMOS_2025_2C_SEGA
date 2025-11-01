@@ -32,6 +32,11 @@
 #define LOST 3
 #define GET_AWARD 4
 #define VICTORY 5
+#define EXIT 6
+
+#define GET_POINTS_AWARDS 250
+#define GET_POINTS_VICTORY 2000
+#define SUBTRACT_POINTS 150
 
 #define SIZE_VECTEX 12
 #define SIZE_VECCHUNK 5
@@ -50,6 +55,7 @@ typedef struct
     int numAwards;
     int maxLives;
     int points;
+    int movesTurn;
     int keys;
     bool cross;
     int crossTurn;
@@ -77,6 +83,8 @@ bool Maze_update(tMaze* pMaze, tCola* colaTurn);
 int Maze_check(tMaze* pMaze);
 int Maze_getColumns(tMaze* pMaze);
 int Maze_getRows(tMaze* pMaze);
+int Maze_getPoints(tMaze* pMaze);
+int Maze_getMoves(tMaze* pMaze);
 void Maze_resetPlayer(tMaze* pMaze);
 void Maze_recreateGame(tMaze* pMaze, tCola* pColaMovement);
 

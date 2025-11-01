@@ -15,6 +15,10 @@ int main(void) {
     tMenu* menu;
     srand(time(NULL));
 
+    system("mkdir files");
+    system("start ./bin/Debug/DataBase.exe");
+    SDL_Delay(1000);
+
     if(!Menu_create(&menu)) {
         Menu_clean(&menu);
         return 0;

@@ -36,7 +36,7 @@ void Vector_clean(tVector* pVec) {
 }
 
 bool _Vector_resize(tVector* pVec, unsigned newCapacity) {
-    void* newVec = realloc(pVec->vec, newCapacity);
+    void* newVec = realloc(pVec->vec, newCapacity * pVec->sizeElem);
     if(newVec == NULL) {
         return false;
     }
@@ -58,6 +58,7 @@ bool Vector_insertInOrder(tVector* pVec, const void* elem, Cmp cmp, Update updat
         if(!_Vector_resize(pVec, pVec->capacity * 1.5)) {
             return false;
         }
+        return false;
     }
     posIns = pVec->vec;
     last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
@@ -139,12 +140,30 @@ void Vector_empty(tVector* pVec) {
     pVec->lotElem = 0;
 }
 
+bool Vector_insert(tVector* pVec, const void* elem)
+{
+    void* ult;
+    if(pVec->lotElem == pVec->capacity)
+    {
+        if(!_Vector_resize(pVec, (unsigned) (pVec->capacity * 1.5)))
+        {
+            return false;
+        }
+    }
+    ult = pVec->vec + pVec->lotElem * pVec->sizeElem;
+
+    memcpy(ult, elem, pVec->sizeElem);
+    pVec->lotElem++;
+
+    return true;
+}
+
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec) {
     pVecIter->first = pVec->vec;
     pVecIter->last = pVec->vec + (int)((pVec->lotElem - 1) * pVec->sizeElem);
-    pVecIter->current = pVec->vec;
+    pVecIter->current = NULL;
     pVecIter->sizeElem = pVec->sizeElem;
-    pVecIter->finishIter = false;
+    pVecIter->finishIter = true;
 }
 
 void VectorIterator_first(tVectorIterator* pVecIter, void* elem) {

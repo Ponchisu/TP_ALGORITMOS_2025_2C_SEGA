@@ -34,6 +34,7 @@ int Vector_bsearch(tVector* pVec, void* elem, Cmp cmp);
 bool Vector_update(tVector* pVec, const void* elem, Cmp cmp, Update update);
 bool Vector_isEmpty(tVector* pVec);
 void Vector_empty(tVector* pVec);
+bool Vector_insert(tVector* pVec, const void* elem);
 
 void VectorIterator_create(tVectorIterator* pVecIter, tVector* pVec);
 void VectorIterator_first(tVectorIterator* pVecIter, void* elem);

@@ -7,24 +7,46 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "../headers/bool.h"
 #include "../headers/vector.h"
 #include "../headers/textureManager.h"
 #include "../headers/game.h"
+#include "../headers/client.h"
 
-#define SIZE_VECTEXMEN 12
+#define SIZE_VECTEXMEN 13
 #define SIZE_VECBUTTON 4
-#define SIZE_NAME 12
+#define SIZE_VECRANK 10
+#define SIZE_NAME 11
+
+#define SIZE_PRANK 100
 
 #define WIDTH_MENU 600
 #define HEIGTH_MENU 800
 
 #define X_INSRTNAME 88
 #define Y_INSRTNAME 210
-#define WIDTH_INSRTNAME 256
-#define HEIGTH_INSRTNAME 24
 
+#define X_RANK 200
+#define Y_RANK 104
+#define DISTANCE_RANK 50
+
+#define X_BMENU 156
+#define W_BMENU 249
+#define H_BMENU 89
+
+#define Y_BPLAY 260
+#define Y_BRANK 359
+#define Y_BQUIT 458
+
+#define X_BEXIT 8
+#define Y_BEXIT 10
+#define W_BEXIT 93
+#define H_BEXIT 59
+
+#define WIDTH_TCONECT 144
+#define WIDTH_FCONECT 192
 
 #define ISLETTER(a) (((a) >= 'a' && (a) <= 'z') || ((a) >= 'A' && (a) <= 'Z'))
 #define ISNUMBER(a) ((a) >= '0' && (a) <= '9')
@@ -34,8 +56,12 @@ typedef struct
     tGame* game;
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SOCKET socket;
+    bool conect;
     char name[SIZE_NAME];
     SDL_Event event;
+    bool createRank;
+    tVector vecRank;
     tVector vecTex;
     tVector vecButton;
     bool running;
