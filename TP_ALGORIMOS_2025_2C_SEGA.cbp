@@ -14,9 +14,6 @@
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
-				<Linker>
-					<Add library="ws2_32" />
-				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/TP_ALGORIMOS_2025_2C_SEGA" prefix_auto="1" extension_auto="1" />
@@ -51,7 +48,6 @@
 			<Add directory="SDL2_mixer/lib" />
 			<Add directory="SDL2_ttf/lib" />
 		</Linker>
-		<Unit filename="../Facultad/Cursando/TP_ALGORITMOS_2025_2C_SEGA/TP_ALGORIMOS_2025_2C_SEGA.cbp" />
 		<Unit filename="headers/awards.h" />
 		<Unit filename="headers/bool.h" />
 		<Unit filename="headers/client.h" />
