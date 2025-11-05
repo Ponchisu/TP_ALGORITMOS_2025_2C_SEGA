@@ -35,7 +35,6 @@ void process_request(tDbManager* pDb, const char *request, char *response) {
     int operation;
     char info[BUFFER_SIZE];
     sscanf(request, "%d %[^\n]", &operation, info);
-    printf("%d\n", operation);
     switch (operation) {
         case REQ_GET_RANKING:
             Database_getRanking(pDb, response);
