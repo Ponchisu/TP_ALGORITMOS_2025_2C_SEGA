@@ -34,20 +34,21 @@ SOCKET create_server_socket() {
 void process_request(tDbManager* pDb, const char *request, char *response) {
     int operation;
     char info[BUFFER_SIZE];
-    sscanf(request, "%d%[^\n]", &operation, info);
+    sscanf(request, "%d %[^\n]", &operation, info);
+    printf("%d\n", operation);
     switch (operation) {
-    case REQ_GET_RANKING:
-        Database_getRanking(pDb, response);
-        break;
-    case REQ_REGISTER_PLAYER:
-        DataBase_registerPlayer(pDb, info, response);
-        break;
-    case REQ_NEW_RUN:
-        Database_registerNewRun(pDb, info, response);
-        break;
-    default:
-        puts("Codigo desconocido");
-        break;
+        case REQ_GET_RANKING:
+            Database_getRanking(pDb, response);
+            break;
+        case REQ_REGISTER_PLAYER:
+            DataBase_registerPlayer(pDb, info, response);
+            break;
+        case REQ_NEW_RUN:
+            Database_registerNewRun(pDb, info, response);
+            break;
+        default:
+            puts("Codigo desconocido");
+            break;
     }
 }
 

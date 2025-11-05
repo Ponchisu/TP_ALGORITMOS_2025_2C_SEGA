@@ -8,13 +8,15 @@ void _Menu_drawRank(tMenu* pMenu);
 void _Menu_insertName(tMenu* pMenu);
 void _Menu_handleinsertName(tMenu* pMenu);
 void _Menu_insertNameDraw(tMenu* pMenu);
+bool _Menu_createRanking(tMenu* pMenu);
 
 int _Button_cmp(const void* elem1, const void* elem2);
 void _Button_update(void* elem1, const void* elem2);
 
 bool Menu_create(tMenu** pMenu) {
     SDL_Surface* icon;
-    SDL_Color nameColor = {255, 255, 255, 255};
+    SDL_Color colorConected = {152, 229, 80, 255};
+    SDL_Color colorDisconected = {216, 18, 18, 255};
     *pMenu = (tMenu*)malloc(sizeof(tMenu));
     if(*pMenu == NULL) {
         fprintf(stderr, "Error al crear menu\n");
@@ -32,7 +34,7 @@ bool Menu_create(tMenu** pMenu) {
     (*pMenu)->renderer = NULL;
     (*pMenu)->click = NULL;
     (*pMenu)->music = NULL;
-    
+
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Error al inicializar SDL: %s\n", SDL_GetError());
         return false;
@@ -121,13 +123,13 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
-    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonPlay.png", "bPlay", (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar imagen buttonPlay\n");
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonStart.png", "bStart", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen buttonStart\n");
         return false;
     }
 
-    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonPlayH.png", "bPlayH", (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar imagen buttonPlayH\n");
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonStartH.png", "bStartH", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen buttonStartH\n");
         return false;
     }
 
@@ -141,21 +143,6 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
-    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonQuit.png", "bQuit", (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar imagen buttonQuit\n");
-        return false;
-    }
-
-    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonQuitH.png", "bQuitH", (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar imagen buttonQuitH\n");
-        return false;
-    }
-
-    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/ranking.png", "rank", (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar imagen ranking\n");
-        return false;
-    }
-
     if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonExit.png", "bExit", (*pMenu)->renderer)) {
         fprintf(stderr, "Error al cargar imagen buttonExit\n");
         return false;
@@ -166,28 +153,50 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/ranking.png", "rank", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen ranking\n");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonBack.png", "bBack", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen buttonBack\n");
+        return false;
+    }
+
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/buttonBackH.png", "bBackH", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen buttonBackH\n");
+        return false;
+    }
+
     if(!TextureManager_load(&(*pMenu)->vecTex, "assets/manuName.png", "mName", (*pMenu)->renderer)) {
         fprintf(stderr, "Error al cargar imagen manuName\n");
         return false;
     }
 
-    (*pMenu)->font = TTF_OpenFont("assets/Monocraft.ttf", 24);
-    if((*pMenu)->font == NULL) {
+    if(!TextureManager_load(&(*pMenu)->vecTex, "assets/insertNameH.png", "insertNameH", (*pMenu)->renderer)) {
+        fprintf(stderr, "Error al cargar imagen insertNameH\n");
+        return false;
+    }
+
+    (*pMenu)->fontName = TTF_OpenFont("assets/Monocraft.ttf", 60);
+    if((*pMenu)->fontName == NULL) {
         fprintf(stderr, "Error al cargar fuente\n");
         return false;
     }
 
-    if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Insertar nombre:", "insrtName", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
-        fprintf(stderr, "Error al cargar Insertar nombre:\n");
+    (*pMenu)->font = TTF_OpenFont("assets/Monocraft.ttf", 24);
+    if((*pMenu)->fontName == NULL) {
+        fprintf(stderr, "Error al cargar fuente\n");
         return false;
     }
+
     if((*pMenu)->conect == true) {
-        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Connected", "conection", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
+        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Connected", "conection", (*pMenu)->font, colorConected, (*pMenu)->renderer)) {
             fprintf(stderr, "Error al cargar Insertar conect:\n");
             return false;
         }
     } else {
-        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Disconnected", "conection", (*pMenu)->font, nameColor, (*pMenu)->renderer)) {
+        if(!TextureManager_loadFont(&(*pMenu)->vecTex, "Disconnected", "conection", (*pMenu)->font, colorDisconected, (*pMenu)->renderer)) {
             fprintf(stderr, "Error al cargar Insertar conect:\n");
             return false;
         }
@@ -198,6 +207,8 @@ bool Menu_create(tMenu** pMenu) {
     (*pMenu)->playGame = false;
     (*pMenu)->showRanking = false;
     (*pMenu)->createRank = true;
+    (*pMenu)->insertNameH = false;
+    (*pMenu)->insertName = 0;
     strcpy((*pMenu)->name, "");
 
     if(!Vector_create(&(*pMenu)->vecButton, sizeof(tButton), SIZE_VECBUTTON)) {
@@ -205,23 +216,23 @@ bool Menu_create(tMenu** pMenu) {
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "play", X_BMENU, Y_BPLAY, W_BMENU,H_BMENU )) {
-        fprintf(stderr, "Error al cargar button play\n");
+    if(!Button_load(&(*pMenu)->vecButton, "start", X_BSTART, Y_BSTART, W_BSTART, H_BSTART)) {
+        fprintf(stderr, "Error al cargar button start\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "ranking", X_BMENU, Y_BRANK, W_BMENU, H_BMENU)) {
+    if(!Button_load(&(*pMenu)->vecButton, "ranking", X_BRANK, Y_BRANK, W_BRANK, H_BRANK)) {
         fprintf(stderr, "Error al cargar button Ranking\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "quit", X_BMENU, Y_BQUIT, W_BMENU, H_BMENU)) {
-        fprintf(stderr, "Error al cargar button Quit\n");
+    if(!Button_load(&(*pMenu)->vecButton, "exit", X_BEXIT, Y_BEXIT, W_BEXIT, H_BEXIT)) {
+        fprintf(stderr, "Error al cargar button exit\n");
         return false;
     }
 
-    if(!Button_load(&(*pMenu)->vecButton, "exit", X_BEXIT, Y_BEXIT, W_BEXIT, H_BEXIT)) {
-        fprintf(stderr, "Error al cargar button Exit\n");
+    if(!Button_load(&(*pMenu)->vecButton, "back", X_BBACK, Y_BBACK, W_BBACK, H_BBACK)) {
+        fprintf(stderr, "Error al cargar button back\n");
         return false;
     }
 
@@ -320,9 +331,9 @@ void _Menu_handleEvents(tMenu* pMenu) {
     int x,y;
     tButton bPlay, bRanking, bQuit;
 
-    Button_search(&pMenu->vecButton, "play", &bPlay);
+    Button_search(&pMenu->vecButton, "start", &bPlay);
     Button_search(&pMenu->vecButton, "ranking", &bRanking);
-    Button_search(&pMenu->vecButton, "quit", &bQuit);
+    Button_search(&pMenu->vecButton, "exit", &bQuit);
 
     while(SDL_PollEvent(&pMenu->event)) {
         switch (pMenu->event.type) {
@@ -391,11 +402,11 @@ void _Menu_draw(tMenu* pMenu) {
 
     TextureManager_draw(&pMenu->vecTex, "menu", 0, 0, pMenu->renderer);
     TextureManager_draw(&pMenu->vecTex, "conection", 0, WIDTH_MENU - (pMenu->conect == true ? WIDTH_TCONECT : WIDTH_FCONECT), pMenu->renderer);
-    Button_search(&pMenu->vecButton, "play", &button);
+    Button_search(&pMenu->vecButton, "start", &button);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bPlayH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bStartH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bPlay", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bStart", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     Button_search(&pMenu->vecButton, "ranking", &button);
@@ -405,11 +416,11 @@ void _Menu_draw(tMenu* pMenu) {
         TextureManager_draw(&pMenu->vecTex, "bRank", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
-    Button_search(&pMenu->vecButton, "quit", &button);
+    Button_search(&pMenu->vecButton, "exit", &button);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bQuitH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bExitH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bQuit", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bExit", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     SDL_RenderPresent(pMenu->renderer);
@@ -438,7 +449,7 @@ bool _Menu_createRanking(tMenu* pMenu) {
     while (pipe) {
         *pipe = '\0';
         sscanf(player, "%d %10s %d", &id, name, &points);
-        sprintf(pRank, "%-10s        %8d", name, points);
+        sprintf(pRank, "%-10s             %8d", name, points);
         if(!TextureManager_loadFontNotID(&pMenu->vecRank, pRank, pMenu->font, color, pMenu->renderer)) {
             puts("ERROR");
             return false;
@@ -446,7 +457,7 @@ bool _Menu_createRanking(tMenu* pMenu) {
         player = pipe + 1;
         pipe = strchr(player, '|');
     }
-    
+
 
     pMenu->createRank = false;
     return true;
@@ -468,7 +479,7 @@ void _Menu_rankingShow(tMenu* pMenu) {
 void  _Menu_handleEventsRank(tMenu* pMenu) {
     int x,y;
     tButton bExit;
-    Button_search(&pMenu->vecButton, "exit", &bExit);
+    Button_search(&pMenu->vecButton, "back", &bExit);
     while(SDL_PollEvent(&pMenu->event)) {
         switch (pMenu->event.type) {
             case SDL_QUIT:
@@ -506,17 +517,17 @@ void _Menu_drawRank(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
     tButton button;
 
-    Button_search(&pMenu->vecButton, "exit", &button);
+    Button_search(&pMenu->vecButton, "back", &button);
 
     TextureManager_draw(&pMenu->vecTex, "rank", 0, 0, pMenu->renderer);
     if(Button_isHover(&button) == true) {
-        TextureManager_draw(&pMenu->vecTex, "bExitH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bBackH", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }else {
-        TextureManager_draw(&pMenu->vecTex, "bExit", Button_getY(&button), Button_getX(&button), pMenu->renderer);
+        TextureManager_draw(&pMenu->vecTex, "bBack", Button_getY(&button), Button_getX(&button), pMenu->renderer);
     }
 
     if(Vector_isEmpty(&pMenu->vecRank) == false) {
-        TextureManager_drawVec(&pMenu->vecRank, X_RANK, Y_RANK, DISTANCE_RANK, pMenu->renderer);
+        TextureManager_drawVec(&pMenu->vecRank, Y_RANK, X_RANK, DISTANCE_RANK, pMenu->renderer);
     }
 
 
@@ -572,14 +583,24 @@ void _Menu_insertNameDraw(tMenu* pMenu) {
     SDL_RenderClear(pMenu->renderer);
 
     TextureManager_draw(&pMenu->vecTex, "mName", 0, 0, pMenu->renderer);
-    TextureManager_draw(&pMenu->vecTex, "insrtName", Y_INSRTNAME, X_INSRTNAME,  pMenu->renderer);
+
+    if(pMenu->insertName == 30) {
+        pMenu->insertNameH = pMenu->insertNameH == true ? false : true;
+        pMenu->insertName = 0;
+    } else {
+        pMenu->insertName ++;
+    }
+
+    if(pMenu->insertNameH == true) {
+        TextureManager_draw(&pMenu->vecTex, "insertNameH", 205, 73, pMenu->renderer);
+    }
 
     if(strlen(pMenu->name) > 0) {
         SDL_Color color = {255, 255, 255, 255};
 
-        SDL_Surface* surface = TTF_RenderText_Solid(pMenu->font, pMenu->name, color);
+        SDL_Surface* surface = TTF_RenderText_Solid(pMenu->fontName, pMenu->name, color);
         SDL_Texture* nameTexture = SDL_CreateTextureFromSurface(pMenu->renderer, surface);
-        SDL_Rect nameRect = {209, 329, surface->w, surface->h};
+        SDL_Rect nameRect = {X_INSERTNAME, Y_INSERTNAME, surface->w, surface->h};
         SDL_RenderCopy(pMenu->renderer, nameTexture, NULL, &nameRect);
         SDL_FreeSurface(surface);
         SDL_DestroyTexture(nameTexture);

@@ -7,7 +7,7 @@
 #include "../headersDB/tree.h"
 #include "../headersDB/list.h"
 
-#define SIZE_NAME 11
+#define SIZE_NAME 10
 #define BUFFER_SIZE 1024
 #define TOP_RANKING 10
 

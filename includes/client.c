@@ -45,20 +45,20 @@ void close_connection(SOCKET* sock) {
 void sendPlayer(SOCKET* pSocket, const char* name, char* response) {
     char buffer[BUFFER_SIZE];
 
-    snprintf(buffer, BUFFER_SIZE, "%d%s", REQ_REGISTER_PLAYER, name);
+    snprintf(buffer, BUFFER_SIZE, "%d %s", REQ_REGISTER_PLAYER, name);
     send_request(pSocket, buffer, response);
 }
 
 void sendRun(SOCKET* pSocket, const char* name, int points, int moves, char* response) {
     char buffer[BUFFER_SIZE];
 
-    snprintf(buffer, BUFFER_SIZE, "%d%s|%d|%d", REQ_NEW_RUN, name, points, moves);
+    snprintf(buffer, BUFFER_SIZE, "%d %s|%d|%d", REQ_NEW_RUN, name, points, moves);
     send_request(pSocket, buffer, response);
 }
 
 void getRanking(SOCKET* pSocket, char* response) {
     char buffer[BUFFER_SIZE];
 
-    snprintf(buffer, BUFFER_SIZE, "%dNULL", REQ_GET_RANKING);
+    snprintf(buffer, BUFFER_SIZE, "%d NULL", REQ_GET_RANKING);
     send_request(pSocket, buffer, response);
 }

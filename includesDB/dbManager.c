@@ -202,6 +202,8 @@ bool DataBase_registerPlayer(tDbManager* pDb,const char* buffer, char* response)
     strcpy(playerIndx.name, buffer);
     playerIndx.idPlayer = -1;
 
+    puts(playerIndx.name);
+
     Tree_searchNotKey(&pDb->treePlayerIdx, &playerIndx, _PlayerIndex_cmpName, _PlayerIndex_update);
 
     if (playerIndx.idPlayer != -1) {
