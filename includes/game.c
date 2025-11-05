@@ -161,7 +161,7 @@ int Game_running(tGame* game, bool conect, char* name) {
     }
 
     if(state == VICTORY) {
-        puts("Ganaste papu esc para ir al menu");
+        puts("Ganaste esc para ir al menu");
         Mix_HaltMusic();
         if(conect == true) {
             sendRun(game->socket, name, Maze_getPoints(game->maze), Maze_getMoves(game->maze), response);
@@ -178,7 +178,7 @@ int Game_running(tGame* game, bool conect, char* name) {
     }
 
     if(state == LOST) {
-        puts("Perdiste papu esc para ir al menu");
+        puts("Perdiste esc para ir al menu");
         Mix_HaltMusic();
         Mix_VolumeMusic(15);
         SoundManager_playMusic(&game->vecMusic, "musicLost");
